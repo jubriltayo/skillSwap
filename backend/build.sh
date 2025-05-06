@@ -1,16 +1,20 @@
 #!/bin/bash
 
-# Install PHP and dependencies
-sudo apt-get update
-sudo apt-get install -y php8.2 php8.2-common php8.2-cli php8.2-pgsql composer
+# Install PHP and Composer without sudo
+apt-get update && apt-get install -y \
+    php8.2 \
+    php8.2-pgsql \
+    composer
 
-# Install project dependencies
+# Install dependencies
 composer install --no-dev --optimize-autoloader
 
-# Optimize Laravel
-php artisan optimize:clear
+# Cache and optimize
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
-# Run migrations (only if DB credentials are set)
+# Run migrations if DB is configured
 if [ -n "$DB_HOST" ]; then
     php artisan migrate --force --no-interaction
 fi
