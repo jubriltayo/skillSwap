@@ -1,30 +1,25 @@
 #!/bin/bash
 
-# 1. Install PHP from trusted source
+# 1. Setup directories
 PHP_DIR="$HOME/php"
 mkdir -p $PHP_DIR
 cd $PHP_DIR
 
-# Download pre-compiled PHP binary (Ubuntu 20.04 compatible)
-curl -sSL https://github.com/shivammathur/php-builder/releases/download/php-8.2.20/php-8.2.20-linux-x86_64.tar.gz | tar -xz --strip-components=1
+# 2. Download PHP from official Render cache
+curl -sSL https://render-php-binary-cache.s3.amazonaws.com/php-8.2.20-render-compatible.tar.gz | tar -xz
 
-# Verify PHP installation
-./bin/php -v || exit 1
+# 3. Verify PHP
+$PHP_DIR/bin/php -v || { echo "PHP installation failed"; exit 1; }
 
-# 2. Install Composer
-curl -sS https://getcomposer.org/installer | ./bin/php -- --install-dir=./bin --filename=composer
-./bin/composer -V || exit 1
+# 4. Install Composer
+curl -sS https://getcomposer.org/installer | $PHP_DIR/bin/php -- --install-dir=$PHP_DIR/bin --filename=composer
+$PHP_DIR/bin/composer -V || { echo "Composer installation failed"; exit 1; }
 
-# 3. Install project dependencies
+# 5. Install Laravel dependencies
 cd $HOME/render/project/src/backend
-../../php/bin/composer install --no-dev --optimize-autoloader
+$PHP_DIR/bin/composer install --no-dev --optimize-autoloader
 
-# 4. Laravel optimizations
-../../php/bin/php artisan config:cache
-../../php/bin/php artisan route:cache
-../../php/bin/php artisan view:cache
-
-# 5. Run migrations (if DB configured)
-if [ -n "$DB_HOST" ]; then
-  ../../php/bin/php artisan migrate --force --no-interaction
-fi
+# 6. Laravel optimizations
+$PHP_DIR/bin/php artisan config:cache
+$PHP_DIR/bin/php artisan route:cache
+$PHP_DIR/bin/php artisan view:cache
