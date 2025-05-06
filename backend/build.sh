@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# Install PHP 8.2 via Node.js
+# Install PHP and Composer (Render-compatible method)
 export PHP_INSTALL_DIR="$HOME/php"
 mkdir -p $PHP_INSTALL_DIR
-curl -sS https://raw.githubusercontent.com/shivammathur/setup-php/master/setup-php.sh | bash -s -- \
-  --php-version=8.2 \
-  --install-dir=$PHP_INSTALL_DIR \
-  --no-interaction
+
+# Download and install PHP
+curl -sSL https://github.com/shivammathur/php-builder/releases/latest/download/php-8.2-linux-x86_64.tar.gz | tar -xz -C $PHP_INSTALL_DIR
 
 # Add PHP to PATH
 export PATH="$PHP_INSTALL_DIR/bin:$PATH"
@@ -18,11 +17,11 @@ curl -sS https://getcomposer.org/installer | php -- --install-dir=$PHP_INSTALL_D
 $PHP_INSTALL_DIR/bin/composer install --no-dev --optimize-autoloader
 
 # Laravel optimizations
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+$PHP_INSTALL_DIR/bin/php artisan config:cache
+$PHP_INSTALL_DIR/bin/php artisan route:cache
+$PHP_INSTALL_DIR/bin/php artisan view:cache
 
 # Run migrations if DB available
 if [ -n "$DB_HOST" ]; then
-  php artisan migrate --force --no-interaction
+  $PHP_INSTALL_DIR/bin/php artisan migrate --force --no-interaction
 fi
