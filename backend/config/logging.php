@@ -127,6 +127,24 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'render' => [
+            'driver' => 'monolog',
+            'handler' => \Monolog\Handler\StreamHandler::class,
+            'with' => [
+                'stream' => 'php://stderr', // Render specifically watches stderr
+            ],
+            'level' => 'debug',
+        ],
+    
+        'stderr' => [
+            'driver' => 'monolog',
+            'handler' => \Monolog\Handler\StreamHandler::class,
+            'with' => [
+                'stream' => 'php://stderr',
+            ],
+            'level' => 'error',
+        ],
+
     ],
 
 ];
