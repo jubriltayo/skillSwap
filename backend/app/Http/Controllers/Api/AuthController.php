@@ -1,59 +1,59 @@
 <?php
 
-// namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api;
 
-// use App\Http\Controllers\Controller;
-// use App\Http\Requests\LoginRequest;
-// use App\Http\Requests\SignupRequest;
-// use App\Http\Resources\UserResource;
-// use App\Models\User;
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Auth;
-// use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\SignupRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
-// class AuthController extends Controller
-// {
-//     public static function signup(SignupRequest $request) {
-//         $data = $request->validated();
-//         $data['password'] = Hash::make($data['password']);
+class AuthController extends Controller
+{
+    public static function signup(SignupRequest $request) {
+        $data = $request->validated();
+        $data['password'] = Hash::make($data['password']);
 
-//         $user = User::create($data);
-//         $token = $user->createToken('auth_token')->plainTextToken;
+        $user = User::create($data);
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-//         return response()->json([
-//             'token' => $token,
-//             'user' => new UserResource($user),
-//         ], 201);
-//     }
+        return response()->json([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 201);
+    }
 
-//     public static function login(LoginRequest $request) {
-//         $credentials = $request->validated();
+    public static function login(LoginRequest $request) {
+        $credentials = $request->validated();
 
-//         if (!Auth::attempt($credentials)) {
-//             return response()->json([
-//                 'message' => 'Invalid credentials'
-//             ], 401);
-//         }
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
 
-//         $user = Auth::user();
-//         $token = $user->createToken('auth_token')->plainTextToken;
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-//         return response()->json([
-//             'token' => $token,
-//             'user' => new UserResource($user),
-//         ], 200);
-//     }
+        return response()->json([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 200);
+    }
 
-//     public static function logout(Request $request) {
-//         if ($user = Auth::user()) {
-//             $user->tokens()->delete();
-//         }
+    public static function logout(Request $request) {
+        if ($user = Auth::user()) {
+            $user->tokens()->delete();
+        }
 
-//         return response()->json([
-//             'message' => 'Logged out successfully'
-//         ], 200);
-//     }
-// }
+        return response()->json([
+            'message' => 'Logged out successfully'
+        ], 200);
+    }
+}
 
 
 
@@ -233,117 +233,117 @@
 // }
 
 
-namespace App\Http\Controllers\Api;
+// namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\SignupRequest;
-use App\Http\Resources\UserResource;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
-use Laravel\Sanctum\Sanctum;
+// use App\Http\Controllers\Controller;
+// use App\Http\Requests\SignupRequest;
+// use App\Http\Resources\UserResource;
+// use App\Models\User;
+// use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\Hash;
+// use Illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\Schema;
+// use Laravel\Sanctum\Sanctum;
 
-class AuthController extends Controller
-{
-    public function signup(SignupRequest $request)
-    {
-        Log::channel('render')->info('Signup attempt initiated', [
-            'email' => $request->email,
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent()
-        ]);
+// class AuthController extends Controller
+// {
+//     public function signup(SignupRequest $request)
+//     {
+//         Log::channel('render')->info('Signup attempt initiated', [
+//             'email' => $request->email,
+//             'ip' => $request->ip(),
+//             'user_agent' => $request->userAgent()
+//         ]);
 
-        // Phase 1: Pre-flight checks
-        try {
-            // 1A. Verify database connection
-            DB::connection()->getPdo();
-            Log::channel('render')->debug('Database connection verified');
+//         // Phase 1: Pre-flight checks
+//         try {
+//             // 1A. Verify database connection
+//             DB::connection()->getPdo();
+//             Log::channel('render')->debug('Database connection verified');
 
-            // 1B. Verify Sanctum availability
-            if (!class_exists(Sanctum::class)) {
-                throw new \RuntimeException('Sanctum not installed');
-            }
+//             // 1B. Verify Sanctum availability
+//             if (!class_exists(Sanctum::class)) {
+//                 throw new \RuntimeException('Sanctum not installed');
+//             }
 
-            // 1C. Verify users table exists
-            if (!Schema::hasTable('users')) {
-                throw new \RuntimeException('Users table missing');
-            }
+//             // 1C. Verify users table exists
+//             if (!Schema::hasTable('users')) {
+//                 throw new \RuntimeException('Users table missing');
+//             }
 
-        } catch (\Exception $e) {
-            Log::channel('render')->error('Pre-signup validation failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+//         } catch (\Exception $e) {
+//             Log::channel('render')->error('Pre-signup validation failed', [
+//                 'error' => $e->getMessage(),
+//                 'trace' => $e->getTraceAsString()
+//             ]);
             
-            return response()->json([
-                'message' => 'Service unavailable',
-                'error' => config('app.debug') ? $e->getMessage() : null,
-                'timestamp' => now()->toISOString()
-            ], 503);
-        }
+//             return response()->json([
+//                 'message' => 'Service unavailable',
+//                 'error' => config('app.debug') ? $e->getMessage() : null,
+//                 'timestamp' => now()->toISOString()
+//             ], 503);
+//         }
 
-        // Phase 2: Registration processing
-        try {
-            $data = $request->validated();
+//         // Phase 2: Registration processing
+//         try {
+//             $data = $request->validated();
             
-            // 2A. Manual duplicate check
-            if (User::withTrashed()->where('email', $data['email'])->exists()) {
-                Log::channel('render')->warning('Duplicate registration attempt', [
-                    'email' => $data['email']
-                ]);
-                return response()->json([
-                    'message' => 'Email already registered',
-                    'errors' => ['email' => ['This email is already in use']]
-                ], 422);
-            }
+//             // 2A. Manual duplicate check
+//             if (User::withTrashed()->where('email', $data['email'])->exists()) {
+//                 Log::channel('render')->warning('Duplicate registration attempt', [
+//                     'email' => $data['email']
+//                 ]);
+//                 return response()->json([
+//                     'message' => 'Email already registered',
+//                     'errors' => ['email' => ['This email is already in use']]
+//                 ], 422);
+//             }
 
-            // 2B. Create user
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password'])
-            ]);
+//             // 2B. Create user
+//             $user = User::create([
+//                 'name' => $data['name'],
+//                 'email' => $data['email'],
+//                 'password' => Hash::make($data['password'])
+//             ]);
 
-            // 2C. Generate token
-            $token = $user->createToken('auth_token')->plainTextToken;
+//             // 2C. Generate token
+//             $token = $user->createToken('auth_token')->plainTextToken;
             
-            Log::channel('render')->info('User registered successfully', [
-                'user_id' => $user->id,
-                'email' => $user->email
-            ]);
+//             Log::channel('render')->info('User registered successfully', [
+//                 'user_id' => $user->id,
+//                 'email' => $user->email
+//             ]);
 
-            return response()->json([
-                'user' => new UserResource($user),
-                'token' => $token,
-                'token_type' => 'Bearer'
-            ], 201);
+//             return response()->json([
+//                 'user' => new UserResource($user),
+//                 'token' => $token,
+//                 'token_type' => 'Bearer'
+//             ], 201);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::channel('render')->warning('Validation failed', [
-                'errors' => $e->errors(),
-                'input' => $request->except('password')
-            ]);
-            throw $e;
+//         } catch (\Illuminate\Validation\ValidationException $e) {
+//             Log::channel('render')->warning('Validation failed', [
+//                 'errors' => $e->errors(),
+//                 'input' => $request->except('password')
+//             ]);
+//             throw $e;
             
-        } catch (\Exception $e) {
-            Log::channel('render')->error('Registration processing failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'input' => $request->except('password')
-            ]);
+//         } catch (\Exception $e) {
+//             Log::channel('render')->error('Registration processing failed', [
+//                 'error' => $e->getMessage(),
+//                 'trace' => $e->getTraceAsString(),
+//                 'input' => $request->except('password')
+//             ]);
             
-            return response()->json([
-                'message' => 'Registration failed',
-                'error' => config('app.debug') ? [
-                    'message' => $e->getMessage(),
-                    'exception' => get_class($e),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine()
-                ] : null,
-                'timestamp' => now()->toISOString()
-            ], 500);
-        }
-    }
-}
+//             return response()->json([
+//                 'message' => 'Registration failed',
+//                 'error' => config('app.debug') ? [
+//                     'message' => $e->getMessage(),
+//                     'exception' => get_class($e),
+//                     'file' => $e->getFile(),
+//                     'line' => $e->getLine()
+//                 ] : null,
+//                 'timestamp' => now()->toISOString()
+//             ], 500);
+//         }
+//     }
+// }
