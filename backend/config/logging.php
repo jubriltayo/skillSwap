@@ -133,7 +133,7 @@ return [
             'with' => [
                 'stream' => 'php://stderr', // Render specifically watches stderr
             ],
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
     
         'stderr' => [
