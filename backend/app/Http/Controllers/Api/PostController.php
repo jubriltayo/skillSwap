@@ -48,18 +48,18 @@ class PostController extends Controller
             return response()->json(['message' => 'Please provide a search term'], 400);
         }
 
+        $normalizedSearch = strtolower($searchTerm);
+
         $posts = Post::with(['user', 'connections' => function ($query) {
             if (auth()->check()) {
                 $query->where('sender_id', auth()->id());
             }
         }]);
 
-        if ($searchTerm) {
-            $posts->where(function ($q) use ($searchTerm) {
-                $q->where('title', 'like', "%$searchTerm%")
-                    ->orWhere('skill', 'like', "%$searchTerm%");
-            });
-        }
+        $posts->where(function ($q) use ($normalizedSearch) {
+            $q->whereRaw('LOWER(title) LIKE ?', ["%{$normalizedSearch}%"])
+                ->orWhereRaw('LOWER(skill) LIKE ?', ["%{$normalizedSearch}%"]);
+        });
 
         $results = $posts->latest()->get();
 
@@ -123,5 +123,4 @@ class PostController extends Controller
         $post->delete();
         return response('', 204);
     }
-
 }
