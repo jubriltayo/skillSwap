@@ -6,7 +6,7 @@
 
 ## 🔥 Live Demo
 
-- **Frontend**: [https://skill-swap-alpha-neon.vercel.app/](https://skill-swap-alpha-neon.vercel.app/)
+- **Frontend**: [https://skill-swap-alpha-neon.vercel.app](https://skill-swap-alpha-neon.vercel.app/)
 - **Backend**: [https://skillswap-gsey.onrender.com](https://skillswap-gsey.onrender.com)
 
 ---
