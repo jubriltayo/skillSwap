@@ -23,7 +23,7 @@ export default function MyPostCard({ post, onDelete }) {
     };
 
     return (
-        <div className="w-64 bg-indigo-400 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
+        <div className="w-64 bg-blue-100 border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md">
             <div className="p-4 flex flex-col items-center text-center">
                 <div className="w-full flex justify-between items-center mb-3">
                     <span
