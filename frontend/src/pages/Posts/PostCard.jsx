@@ -1,6 +1,6 @@
 export default function PostCard({ post, onConnect }) {
     return (
-        <div className="w-64 bg-blue-50 border border-gray-100 rounded-xl shadow-sm dark:bg-gray-800/90 dark:border-gray-700 transition-all duration-300 hover:shadow-md hover:translate-y-[-2px] dark:hover:shadow-gray-700/20">
+        <div className="w-64 bg-blue-50 border border-gray-100 rounded-xl shadow-sm transition-all duration-300 hover:shadow-md hover:translate-y-[-2px] dark:hover:shadow-gray-700/20">
             <div className="p-5 flex flex-col h-full">
                 <div className="w-full flex justify-between items-center mb-3">
                     <span

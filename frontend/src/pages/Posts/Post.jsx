@@ -84,7 +84,7 @@ export default function Post() {
 
     return (
         <div className="mx-auto w-full max-w-7xl">
-            <div className="sticky top-0 z-10 border-b border-neutral-200/40 bg-gradient-to-r from-white to-white/95 shadow-sm backdrop-blur-sm dark:border-neutral-800/40 dark:from-neutral-950 dark:to-neutral-950/95">
+            <div className="border-b border-neutral-200/40 bg-gradient-to-r from-white to-white/95 shadow-sm backdrop-blur-sm">
                 <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-full sm:w-auto">
                         <h1 className="bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-3xl font-bold text-transparent dark:from-white dark:to-neutral-400">
