@@ -1,4 +1,4 @@
-# Production Dockerfile for Laravel + PostgreSQL on Render
+# ===== BASE IMAGE =====
 FROM ubuntu:22.04
 
 # ===== SYSTEM SETUP =====
@@ -20,6 +20,12 @@ RUN apt-get update && apt-get install -y \
     php8.2-curl \
     php8.2-zip \
     php8.2-opcache \
+    php8.2-bcmath \
+    && apt-get clean
+
+# ===== POSTGRESQL CLIENT =====
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
     && apt-get clean
 
 # ===== COMPOSER =====
@@ -32,15 +38,17 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 WORKDIR /var/www
 COPY . .
 
-# Install dependencies (cached layer)
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader \
     && composer dump-autoload --optimize
 
-# ===== PRODUCTION OPTIMIZATIONS =====
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && chown -R www-data:www-data storage bootstrap/cache
+# ===== PERMISSIONS =====
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+# ===== DATABASE MIGRATION =====
+# This will run when the container starts
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # ===== HEALTH CHECK =====
 COPY health-check.sh /usr/local/bin/
@@ -48,6 +56,7 @@ RUN chmod +x /usr/local/bin/health-check.sh
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD /usr/local/bin/health-check.sh
 
-# ===== RUNTIME =====
+# ===== RUNTIME CONFIGURATION =====
 EXPOSE 8000
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

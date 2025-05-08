@@ -37,6 +37,15 @@ Route::middleware([Cors::class])->group(function () {
         }
     });
 
+    Route::get('/health', function () {
+        try {
+            DB::connection()->getPdo();
+            return response()->json(['status' => 'healthy']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'unhealthy'], 500);
+        }
+    });
+
     // Public routes
     Route::post('/signup', [AuthController::class, 'signup']);
     Route::post('/login', [AuthController::class, 'login']);

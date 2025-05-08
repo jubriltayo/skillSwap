@@ -1,2 +1,2 @@
 #!/bin/bash
-curl -f http://localhost:8000/health || exit 1
+curl -f http://localhost:8000/api/test-crash || exit 1
