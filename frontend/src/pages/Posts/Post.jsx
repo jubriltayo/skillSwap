@@ -87,7 +87,7 @@ export default function Post() {
             <div className="border-b border-neutral-200/40 bg-gradient-to-r from-white to-white/95 shadow-sm backdrop-blur-sm">
                 <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-full sm:w-auto">
-                        <h1 className="bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-3xl font-bold text-transparent dark:from-white dark:to-neutral-400">
+                        <h1 className="text-3xl font-bold">
                             Trending Posts
                         </h1>
                     </div>
@@ -99,7 +99,7 @@ export default function Post() {
                             onChange={handleSearch}
                             placeholder="Search posts..."
                         />
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-neutral-500 dark:text-neutral-400" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-neutral-500" />
                         {isSearching && (
                             <div className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 transform animate-spin rounded-full border-2 border-neutral-400 border-t-transparent" />
                         )}
