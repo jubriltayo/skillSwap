@@ -7,9 +7,35 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\Cors;
+use Illuminate\Support\Facades\DB;
 
 // Apply CORS globally to all routes
 Route::middleware([Cors::class])->group(function () {
+
+    // Test endpoint
+    Route::post('/test-crash', function (Request $request) {
+        // Log directly to stderr (Render captures this)
+        file_put_contents('php://stderr', "TEST CRASH ENDPOINT HIT\n");
+
+        try {
+            DB::statement('SELECT 1'); // Using the correct DB facade
+            file_put_contents('php://stderr', "DATABASE WORKS\n");
+
+            return response()->json([
+                'status' => 'success',
+                'database' => 'connected',
+                'time' => now()->toDateTimeString()
+            ]);
+        } catch (\Exception $e) {
+            file_put_contents('php://stderr', "DATABASE FAILED: " . $e->getMessage() . "\n");
+
+            return response()->json([
+                'status' => 'error',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
 
     // Public routes
     Route::post('/signup', [AuthController::class, 'signup']);
