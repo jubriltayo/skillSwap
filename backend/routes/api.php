@@ -1,42 +1,51 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ConnectionController;
-use App\Http\Controllers\Api\PostController;
-use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ConnectionController;
 
+// Public routes (no authentication required)
+Route::post('/signup', [AuthController::class, 'signup']);
+Route::post('/login', [AuthController::class, 'login']);
 
+// Public endpoints 
+Route::get('/posts', [PostController::class, 'index']); // all posts
+Route::get('/posts/search', [PostController::class, 'search']); // search posts
+Route::get('/posts/{post}', [PostController::class, 'show']); // single post
+Route::get('/users', [UserController::class, 'index']); // all users
+Route::get('/users/{user}', [UserController::class, 'show']); // single user
 
 // Routes only for authenticated users
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Authentication
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Users
-    Route::apiResource('users', UserController::class)->except(['store']);
+    // Users Management (only update and delete need auth)
+    Route::put('/users/{user}', [UserController::class, 'update']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
-    // Search Posts
-    Route::get('/posts/search', [PostController::class, 'search']);
-    // Posts
-    Route::get('/posts', [PostController::class, 'index']); // all posts
-    Route::get('/user/posts', [PostController::class, 'myIndex']); // user posts
-    Route::apiResource('posts', PostController::class)->except(['index']); // user CUD posts
-    
-    // Connections
+    // Posts Management (authenticated operations)
+    Route::get('/user/posts', [PostController::class, 'myIndex']); // current user's posts
+    Route::post('/posts', [PostController::class, 'store']); // create
+    Route::put('/posts/{post}', [PostController::class, 'update']); // update
+    Route::delete('/posts/{post}', [PostController::class, 'destroy']); // delete
+
+    // Connection Management
     Route::post('/posts/{post}/connections', [ConnectionController::class, 'sendRequest']);
-    Route::get('/connections/pending', [ConnectionController::class, 'pendingRequest']);
+    Route::get('/connections/pending', [ConnectionController::class, 'pendingRequests']);
+    Route::get('/connections/accepted', [ConnectionController::class, 'acceptedConnections']);
+    Route::get('/connections', [ConnectionController::class, 'userConnections']);
+    Route::get('/connections/restrictions', [ConnectionController::class, 'userRestrictions']);
+
+    // Connection Actions
     Route::post('/connections/{connection}/accept', [ConnectionController::class, 'acceptRequest']);
     Route::post('/connections/{connection}/reject', [ConnectionController::class, 'rejectRequest']);
-    Route::get('/connections', [ConnectionController::class, 'userConnections']);
-    
+    Route::delete('/connections/{connection}/cancel', [ConnectionController::class, 'cancelRequest']);
 });
-
-
-// Routes for Guests/Unauthenticated users
-Route::post('/signup', [AuthController::class, 'signup']);
-Route::post('/login', [AuthController::class, 'login']);

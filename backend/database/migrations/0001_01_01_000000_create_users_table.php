@@ -21,6 +21,10 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->string('skills_offered')->nullable();
             $table->string('skills_needed')->nullable();
+            $table->string('profile_image')->nullable();
+            $table->string('phone', 20)->nullable();
+            $table->string('linkedin_url')->nullable();
+            $table->string('github_url')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
