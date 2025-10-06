@@ -16,9 +16,6 @@ class ConnectionController extends Controller
         $this->middleware('auth:sanctum');
     }
 
-    /**
-     * Send a connection request to a post owner.
-     */
     public function sendRequest(Request $request, Post $post): JsonResponse
     {
         $user = $request->user();
@@ -32,7 +29,7 @@ class ConnectionController extends Controller
         }
 
         // Check if post is active
-        if (!$post->isActive) {
+        if (!$post->isActive()) {
             return response()->json([
                 'success' => false,
                 'message' => 'This post is no longer active.',
@@ -40,8 +37,8 @@ class ConnectionController extends Controller
         }
 
         // Check for active restriction
-        $restriction = $user->getRestrictionForPost($post);
-        if ($restriction) {
+        if ($user->isRestrictedFromPost($post)) {
+            $restriction = $user->getRestrictionForPost($post);
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot send another request to this post until ' .
@@ -50,21 +47,58 @@ class ConnectionController extends Controller
             ], 429);
         }
 
-        // Check for existing connection (any status)
-        $existingConnection = Connection::where('sender_id', $user->id)
+        // Check if users are already connected (accepted connection exists)
+        $existingAcceptedConnection = Connection::where('status', 'accepted')
+            ->where(function ($query) use ($user, $post) {
+                $query->where(function ($q) use ($user, $post) {
+                    $q->where('sender_id', $user->id)
+                        ->where('receiver_id', $post->user_id);
+                })
+                    ->orWhere(function ($q) use ($user, $post) {
+                        $q->where('sender_id', $post->user_id)
+                            ->where('receiver_id', $user->id);
+                    });
+            })
+            ->first();
+
+        if ($existingAcceptedConnection) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are already connected with this user.',
+                'connection_status' => 'accepted',
+            ], 400);
+        }
+
+        // Check for existing connection to this specific post (any status)
+        $existingPostConnection = Connection::where('sender_id', $user->id)
             ->where('post_id', $post->id)
             ->first();
 
-        if ($existingConnection) {
+        if ($existingPostConnection) {
             $statusMessages = [
                 'pending' => 'You already have a pending request for this post.',
                 'accepted' => 'You are already connected to this post owner.',
+                'rejected' => 'Your previous request for this post was rejected.',
             ];
 
             return response()->json([
                 'success' => false,
-                'message' => $statusMessages[$existingConnection->status] ?? 'Connection already exists.',
-                'connection_status' => $existingConnection->status,
+                'message' => $statusMessages[$existingPostConnection->status] ?? 'Connection already exists.',
+                'connection_status' => $existingPostConnection->status,
+            ], 400);
+        }
+
+        // Check for pending connection to the same user (different post)
+        $existingUserConnection = Connection::where('sender_id', $user->id)
+            ->where('receiver_id', $post->user_id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingUserConnection) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already have a pending connection request with this user.',
+                'connection_status' => 'pending',
             ], 400);
         }
 
@@ -74,6 +108,7 @@ class ConnectionController extends Controller
                 'sender_id' => $user->id,
                 'receiver_id' => $post->user_id,
                 'post_id' => $post->id,
+                'message' => $request->input('message'),
                 'status' => 'pending',
             ]);
 
@@ -82,7 +117,7 @@ class ConnectionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Connection request sent successfully.',
-                'connection' => new ConnectionResource($connection),
+                'data' => new ConnectionResource($connection),
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -92,9 +127,6 @@ class ConnectionController extends Controller
         }
     }
 
-    /**
-     * Accept a connection request.
-     */
     public function acceptRequest(Connection $connection): JsonResponse
     {
         $user = auth()->user();
@@ -108,7 +140,7 @@ class ConnectionController extends Controller
         }
 
         // Check if connection is pending
-        if ($connection->status !== 'pending') {
+        if (!$connection->isPending()) {
             return response()->json([
                 'success' => false,
                 'message' => 'This connection request is no longer pending.',
@@ -123,7 +155,7 @@ class ConnectionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Connection request accepted successfully.',
-                'connection' => new ConnectionResource($connection),
+                'data' => new ConnectionResource($connection),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -133,9 +165,6 @@ class ConnectionController extends Controller
         }
     }
 
-    /**
-     * Reject a connection request and create restriction.
-     */
     public function rejectRequest(Connection $connection): JsonResponse
     {
         $user = auth()->user();
@@ -149,7 +178,7 @@ class ConnectionController extends Controller
         }
 
         // Check if connection is pending
-        if ($connection->status !== 'pending') {
+        if (!$connection->isPending()) {
             return response()->json([
                 'success' => false,
                 'message' => 'This connection request is no longer pending.',
@@ -169,8 +198,8 @@ class ConnectionController extends Controller
                 ]
             );
 
-            // Delete the connection request
-            $connection->delete();
+            // Update connection status to rejected
+            $connection->update(['status' => 'rejected']);
 
             return response()->json([
                 'success' => true,
@@ -185,14 +214,11 @@ class ConnectionController extends Controller
         }
     }
 
-    /**
-     * Get pending connection requests (received by current user).
-     */
     public function pendingRequests(Request $request): JsonResponse
     {
         $connections = Connection::with(['sender', 'post'])
             ->where('receiver_id', auth()->id())
-            ->where('status', 'pending')
+            ->pending()
             ->latest()
             ->get();
 
@@ -203,9 +229,6 @@ class ConnectionController extends Controller
         ]);
     }
 
-    /**
-     * Get all connections for the current user (sent and received).
-     */
     public function userConnections(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -237,13 +260,18 @@ class ConnectionController extends Controller
         ]);
     }
 
-    /**
-     * Get accepted connections (people user can communicate with).
-     */
     public function acceptedConnections(Request $request): JsonResponse
     {
         $user = $request->user();
-        $connections = $user->acceptedConnections()->with(['sender', 'receiver', 'post'])->get();
+
+        $connections = Connection::where('status', 'accepted')
+            ->where(function ($query) use ($user) {
+                $query->where('sender_id', $user->id)
+                    ->orWhere('receiver_id', $user->id);
+            })
+            ->with(['sender', 'receiver', 'post'])
+            ->latest()
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -252,9 +280,6 @@ class ConnectionController extends Controller
         ]);
     }
 
-    /**
-     * Cancel a sent connection request (only if pending).
-     */
     public function cancelRequest(Connection $connection): JsonResponse
     {
         $user = auth()->user();
@@ -268,7 +293,7 @@ class ConnectionController extends Controller
         }
 
         // Can only cancel pending requests
-        if ($connection->status !== 'pending') {
+        if (!$connection->isPending()) {
             return response()->json([
                 'success' => false,
                 'message' => 'You can only cancel pending connection requests.',
@@ -291,9 +316,6 @@ class ConnectionController extends Controller
         }
     }
 
-    /**
-     * Get user's active restrictions.
-     */
     public function userRestrictions(Request $request): JsonResponse
     {
         $restrictions = $request->user()

@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->string('skill');
+            $table->json('skills');
+            $table->string('category')->nullable();
             $table->enum('type', ['offer', 'request']);
-            $table->enum('level', ['beginner', 'intermediate', 'advanced']);
-            $table->boolean('isActive')->default(true);
+            $table->enum('experience_level', ['beginner', 'intermediate', 'advanced']);
+            $table->string('location')->nullable();
+            $table->boolean('is_remote')->default(false);
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->text('description');
             $table->timestamps();
         });

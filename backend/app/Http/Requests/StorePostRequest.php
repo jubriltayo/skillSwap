@@ -8,28 +8,23 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StorePostRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'title' => 'required|string|max:255',
-            'skill' => 'required|string|max:255',
+            'skills' => 'required|array|min:1',
+            'skills.*' => 'string|max:100',
+            'category' => 'nullable|string|max:100',
             'type' => 'required|in:offer,request',
-            'level' => 'required|in:beginner,intermediate,advanced',
-            'isActive' => 'boolean',
-            'description' => 'required|string|max:1000',
+            'experience_level' => 'required|in:beginner,intermediate,advanced',
+            'location' => 'nullable|string|max:255',
+            'is_remote' => 'boolean',
+            'description' => 'required|string|max:2000',
         ];
     }
 

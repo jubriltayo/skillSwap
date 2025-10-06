@@ -9,23 +9,16 @@ use Illuminate\Validation\Rules\Password;
 
 class SignupRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => [
                 'required',
@@ -33,36 +26,28 @@ class SignupRequest extends FormRequest
                 Password::min(8),
                 'confirmed',
             ],
-            'bio' => 'nullable|string|max:500',
+            'bio' => 'nullable|string|max:1000',
             'location' => 'nullable|string|max:255',
-            'skills_offered' => 'nullable|string|max:255',
-            'skills_needed' => 'nullable|string|max:255',
+            'skills_offered' => 'nullable|array',
+            'skills_wanted' => 'nullable|array',
+            'skills_offered.*' => 'string|max:100',
+            'skills_wanted.*' => 'string|max:100',
+            'avatar_url' => 'nullable|url|max:255',
+            'experience_level' => 'nullable|in:beginner,intermediate,advanced,expert',
             'phone' => 'nullable|string|max:20',
             'linkedin_url' => 'nullable|url|max:255',
             'github_url' => 'nullable|url|max:255',
-            'profile_image' => 'nullable|string|max:255', // URL to image
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     */
     public function messages(): array
     {
         return [
-            'name.required' => 'Please provide your full name.',
-            'email.required' => 'Email address is required.',
-            'email.email' => 'Please provide a valid email address.',
-            'email.unique' => 'This email address is already registered.',
-            'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
-            'password.confirmed' => 'Password confirmation does not match.',
-            'bio.max' => 'Bio cannot exceed 500 characters.',
-            'skills_offered.max' => 'Skills offered cannot exceed 255 characters.',
-            'skills_needed.max' => 'Skills needed cannot exceed 255 characters.',
-            'linkedin_url.url' => 'Please provide a valid LinkedIn URL.',
-            'github_url.url' => 'Please provide a valid GitHub URL.',
-            'phone.max' => 'Phone number cannot exceed 20 characters.',
+            'username.required' => 'Please choose a username.',
+            'username.unique' => 'This username is already taken.',
+            'skills_offered.array' => 'Skills offered must be an array.',
+            'skills_wanted.array' => 'Skills wanted must be an array.',
+            'experience_level.in' => 'Experience level must be beginner, intermediate, advanced, or expert.',
         ];
     }
 

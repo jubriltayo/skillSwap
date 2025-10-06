@@ -1,26 +1,229 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Updated color values with proper oklch specifications for better rendering */
+  --background: oklch(0.99 0.002 264.542); /* Subtle warm white with hint of purple */
+  --foreground: oklch(0.13 0.028 261.692); /* #1f2937 - Professional dark gray text */
+  --card: oklch(1 0 0); /* #ffffff - Pure white for cards */
+  --card-foreground: oklch(0.13 0.028 261.692); /* #1f2937 - Dark text on cards */
+  --popover: oklch(1 0 0); /* #ffffff - White popover background */
+  --popover-foreground: oklch(0.13 0.028 261.692); /* #1f2937 - Dark text on popovers */
+  --primary: oklch(0.646 0.222 280.116); /* #8b5cf6 - Vibrant purple primary */
+  --primary-foreground: oklch(0.985 0.002 247.839); /* #ffffff - White text on primary */
+  --secondary: oklch(0.967 0.003 264.542); /* #f1f5f9 - Light secondary background */
+  --secondary-foreground: oklch(0.21 0.034 264.665); /* #1f2937 - Dark text on secondary */
+  --muted: oklch(0.967 0.003 264.542); /* #f1f5f9 - Muted light gray background */
+  --muted-foreground: oklch(0.551 0.027 264.364); /* #6b7280 - Muted gray text */
+  --accent: oklch(0.646 0.222 280.116); /* #8b5cf6 - Purple accent color */
+  --accent-foreground: oklch(0.985 0.002 247.839); /* #ffffff - White text on accent */
+  --destructive: oklch(0.577 0.245 27.325); /* #dc2626 - Red for destructive actions */
+  --destructive-foreground: oklch(1 0 0); /* #ffffff - White text on destructive */
+  --border: oklch(0.928 0.006 264.531); /* #e5e7eb - Light gray borders */
+  --input: oklch(0.967 0.003 264.542); /* #f1f5f9 - Light gray input backgrounds */
+  --ring: oklch(0.646 0.222 280.116); /* Purple focus ring */
+
+  /* Added new semantic colors for skill types and status */
+  --offering: oklch(0.769 0.188 142.495); /* #10b981 - Green for offering skills (optimistic) */
+  --offering-foreground: oklch(1 0 0); /* White text on offering */
+  --seeking: oklch(0.828 0.189 84.429); /* #f59e0b - Amber for seeking skills */
+  --seeking-foreground: oklch(0.145 0 0); /* Dark text on seeking */
+  --active-pulse: oklch(0.646 0.222 280.116); /* Purple for active status */
+  --inactive: oklch(0.556 0 0); /* Gray for inactive status */
+
+  --chart-1: oklch(0.646 0.222 280.116); /* #8b5cf6 - Purple for charts */
+  --chart-2: oklch(0.577 0.245 27.325); /* #dc2626 - Red for charts */
+  --chart-3: oklch(0.828 0.189 84.429); /* #f59e0b - Amber for charts */
+  --chart-4: oklch(0.398 0.07 227.392); /* #4b5563 - Gray for charts */
+  --chart-5: oklch(0.769 0.188 70.08); /* #a16207 - Brown for charts */
+  --radius: 0.625rem; /* 10px - Modern corner rounding */
+  --sidebar: oklch(0.985 0.002 247.839); /* #f1f5f9 - Light gray sidebar */
+  --sidebar-foreground: oklch(0.13 0.028 261.692); /* #1f2937 - Dark sidebar text */
+  --sidebar-primary: oklch(0.646 0.222 280.116); /* #8b5cf6 - Purple sidebar highlights */
+  --sidebar-primary-foreground: oklch(0.985 0.002 247.839); /* #ffffff - White text on sidebar highlights */
+  --sidebar-accent: oklch(0.967 0.003 264.542); /* Light sidebar accent */
+  --sidebar-accent-foreground: oklch(0.21 0.034 264.665); /* Dark text on sidebar accents */
+  --sidebar-border: oklch(0.928 0.006 264.531); /* #e5e7eb - Light gray sidebar borders */
+  --sidebar-ring: oklch(0.707 0.022 261.325); /* Purple sidebar focus ring */
+}
+
+.dark {
+  /* Enhanced dark mode colors with better contrast and vibrancy */
+  --background: oklch(0.13 0.028 261.692); /* Rich dark background */
+  --foreground: oklch(0.985 0.002 247.839); /* Light text */
+  --card: oklch(0.21 0.034 264.665); /* Darker cards with subtle purple tint */
+  --card-foreground: oklch(0.985 0.002 247.839); /* Light text on cards */
+  --popover: oklch(0.21 0.034 264.665); /* Dark popover */
+  --popover-foreground: oklch(0.985 0.002 247.839); /* Light text on popovers */
+  --primary: oklch(0.707 0.222 280.116); /* Brighter purple primary in dark mode */
+  --primary-foreground: oklch(0.13 0.028 261.692); /* Dark text on primary */
+  --secondary: oklch(0.278 0.033 256.848); /* Dark secondary */
+  --secondary-foreground: oklch(0.985 0.002 247.839); /* Light text on secondary */
+  --muted: oklch(0.278 0.033 256.848); /* Dark muted background */
+  --muted-foreground: oklch(0.707 0.022 261.325); /* Muted light text */
+  --accent: oklch(0.707 0.222 280.116); /* Bright purple accent in dark mode */
+  --accent-foreground: oklch(0.13 0.028 261.692); /* Dark text on accent */
+  --destructive: oklch(0.704 0.191 22.216); /* Red destructive */
+  --destructive-foreground: oklch(1 0 0); /* White text on destructive */
+  --border: oklch(1 0 0 / 10%); /* Subtle borders */
+  --input: oklch(1 0 0 / 15%); /* Dark input backgrounds */
+  --ring: oklch(0.707 0.222 280.116); /* Bright purple focus ring */
+
+  /* Dark mode colors for skill types and status */
+  --offering: oklch(0.769 0.188 142.495); /* Green for offering skills */
+  --offering-foreground: oklch(0.145 0 0); /* Dark text on offering */
+  --seeking: oklch(0.828 0.189 84.429); /* Amber for seeking skills */
+  --seeking-foreground: oklch(0.145 0 0); /* Dark text on seeking */
+  --active-pulse: oklch(0.707 0.222 280.116); /* Bright purple for active status */
+  --inactive: oklch(0.556 0 0); /* Gray for inactive status */
+
+  --chart-1: oklch(0.488 0.243 264.376); /* Purple charts */
+  --chart-2: oklch(0.696 0.17 162.48); /* Red charts */
+  --chart-3: oklch(0.769 0.188 70.08); /* Amber charts */
+  --chart-4: oklch(0.627 0.265 303.9); /* Gray charts */
+  --chart-5: oklch(0.645 0.246 16.439); /* Brown charts */
+  --sidebar: oklch(0.21 0.034 264.665); /* Dark sidebar */
+  --sidebar-foreground: oklch(0.985 0.002 247.839); /* Light sidebar text */
+  --sidebar-primary: oklch(0.488 0.243 264.376); /* Purple sidebar highlights */
+  --sidebar-primary-foreground: oklch(0.985 0.002 247.839); /* White text on sidebar highlights */
+  --sidebar-accent: oklch(0.278 0.033 256.848); /* Dark sidebar accent */
+  --sidebar-accent-foreground: oklch(0.985 0.002 247.839); /* Light text on sidebar accents */
+  --sidebar-border: oklch(1 0 0 / 10%); /* Dark sidebar borders */
+  --sidebar-ring: oklch(0.551 0.027 264.364); /* Purple sidebar focus ring */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Added new semantic color tokens */
+  --color-offering: var(--offering);
+  --color-offering-foreground: var(--offering-foreground);
+  --color-seeking: var(--seeking);
+  --color-seeking-foreground: var(--seeking-foreground);
+  --color-active-pulse: var(--active-pulse);
+  --color-inactive: var(--inactive);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Added subtle gradient background for visual interest */
+    background-image: radial-gradient(circle at 20% 50%, oklch(0.646 0.222 280.116 / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, oklch(0.769 0.188 142.495 / 0.02) 0%, transparent 50%);
+  }
+
+  .dark body {
+    /* Dark mode gradient background */
+    background-image: radial-gradient(circle at 20% 50%, oklch(0.646 0.222 280.116 / 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, oklch(0.769 0.188 142.495 / 0.05) 0%, transparent 50%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Added custom animations for loading states and pulsing indicators */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-skeleton {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200px 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .animate-skeleton {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  background-size: 200px 100%;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200px 100%;
+}
+
+/* Enhanced focus states for better accessibility */
+.focus-visible\:ring-2:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--color-ring);
 }

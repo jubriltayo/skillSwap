@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +11,6 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
@@ -21,13 +20,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
+        'avatar_url',
         'bio',
         'location',
         'skills_offered',
-        'skills_needed',
-        'profile_image',
+        'skills_wanted',
+        'experience_level',
         'phone',
         'linkedin_url',
         'github_url',
@@ -53,6 +54,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'skills_offered' => 'array',
+            'skills_wanted' => 'array',
         ];
     }
 
@@ -89,15 +92,46 @@ class User extends Authenticatable
     }
 
     /**
-     * Get all accepted connections for this user (both sent and received).
+     * Get accepted connections where user is the sender.
      */
-    public function acceptedConnections()
+    public function acceptedSentConnections(): HasMany
+    {
+        return $this->hasMany(Connection::class, 'sender_id')
+            ->where('status', 'accepted');
+    }
+
+    /**
+     * Get accepted connections where user is the receiver.
+     */
+    public function acceptedReceivedConnections(): HasMany
+    {
+        return $this->hasMany(Connection::class, 'receiver_id')
+            ->where('status', 'accepted');
+    }
+
+    /**
+     * Get all accepted connections for this user (both sent and received).
+     * This is a custom method, not a relationship.
+     */
+    public function getAcceptedConnections()
     {
         return Connection::where('status', 'accepted')
             ->where(function ($query) {
                 $query->where('sender_id', $this->id)
                     ->orWhere('receiver_id', $this->id);
             });
+    }
+
+    /**
+     * Accessor for accepted connections count.
+     */
+    public function getAcceptedConnectionsCountAttribute(): int
+    {
+        if (isset($this->attributes['accepted_connections_count'])) {
+            return $this->attributes['accepted_connections_count'];
+        }
+
+        return $this->getAcceptedConnections()->count();
     }
 
     /**
@@ -119,7 +153,7 @@ class User extends Authenticatable
     {
         return $this->connectionRestrictions()
             ->where('post_id', $post->id)
-            ->active()
+            ->where('restricted_until', '>', now())
             ->exists();
     }
 
@@ -130,7 +164,7 @@ class User extends Authenticatable
     {
         return $this->connectionRestrictions()
             ->where('post_id', $post->id)
-            ->active()
+            ->where('restricted_until', '>', now())
             ->first();
     }
 }

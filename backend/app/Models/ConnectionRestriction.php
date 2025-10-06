@@ -38,7 +38,7 @@ class ConnectionRestriction extends Model
      */
     public function isActive(): bool
     {
-        return $this->restricted_until > now();
+        return $this->restricted_until->isFuture();
     }
 
     /**
