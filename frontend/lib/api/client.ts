@@ -9,7 +9,10 @@ class ApiClient {
     return null;
   }
 
-  private async request(endpoint: string, options: RequestInit = {}) {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     const token = this.getAuthToken();
 
@@ -39,7 +42,7 @@ class ApiClient {
     return response.json();
   }
 
-  async get(endpoint: string, params?: any) {
+  async get<T>(endpoint: string, params?: Record<string, unknown>): Promise<T> {
     let url = endpoint;
 
     if (params && Object.keys(params).length > 0) {
@@ -58,36 +61,36 @@ class ApiClient {
       url += `?${searchParams.toString()}`;
     }
 
-    return this.request(url);
+    return this.request<T>(url);
   }
 
-  async post(endpoint: string, data?: any) {
-    return this.request(endpoint, {
+  async post<T>(endpoint: string, data?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
       method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async put(endpoint: string, data: any) {
-    return this.request(endpoint, {
+  async put<T>(endpoint: string, data: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
       method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
-  async patch(endpoint: string, data: any) {
-    return this.request(endpoint, {
+  async patch<T>(endpoint: string, data: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
       method: "PATCH",
       body: JSON.stringify(data),
     });
   }
 
-  async delete(endpoint: string) {
-    return this.request(endpoint, { method: "DELETE" });
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: "DELETE" });
   }
 
-  async upload(endpoint: string, formData: FormData): Promise<any> {
-    return this.request(endpoint, {
+  async upload<T>(endpoint: string, formData: FormData): Promise<T> {
+    return this.request<T>(endpoint, {
       method: "POST",
       body: formData,
     });

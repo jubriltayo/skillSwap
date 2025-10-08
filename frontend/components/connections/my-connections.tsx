@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, MapPin, Calendar } from "lucide-react";
 import { useAuth } from "@/lib/contexts/auth-context";
-import type { User } from "@/lib/types/database";
 import Link from "next/link";
 import { useConnections } from "@/lib/contexts/connections-context";
 
@@ -61,7 +60,6 @@ export function MyConnections() {
   return (
     <div className="space-y-4">
       {acceptedConnections.map((connection) => {
-        // Determine which user is the connected user (not the current user)
         const connectedUser =
           connection.sender_id === user?.id
             ? connection.receiver
@@ -143,10 +141,12 @@ export function MyConnections() {
                       </div>
                     </div>
 
-                    <Button variant="outline" size="sm">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Message
-                    </Button>
+                    <Link href={`/messages?connection=${connection.id}`}>
+                      <Button variant="outline" size="sm">
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Message
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>

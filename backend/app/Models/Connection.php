@@ -104,4 +104,9 @@ class Connection extends Model
     {
         return $query->where('status', self::STATUS_REJECTED);
     }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class)->orderBy('created_at', 'asc');
+    }
 }

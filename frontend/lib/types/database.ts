@@ -8,7 +8,10 @@ export interface User {
   location?: string;
   skills_offered: string[];
   skills_wanted: string[];
-  experience_level: string | null;
+  experience_level: "beginner" | "intermediate" | "advanced" | "expert" | null;
+  phone?: string;
+  linkedin_url?: string;
+  github_url?: string;
   created_at: string;
   updated_at: string;
   posts_count?: number;
@@ -45,4 +48,26 @@ export interface Connection {
   sender?: User;
   receiver?: User;
   post?: Post;
+}
+
+export interface Message {
+  id: string;
+  connection_id: string;
+  sender_id: string;
+  receiver_id: string;
+  message: string;
+  is_read: boolean;
+  read_at: string | null;
+  created_at: string;
+  updated_at: string;
+  sender: User;
+}
+
+export interface ConnectionRestriction {
+  id: string;
+  sender_id: string;
+  post_id: string;
+  restricted_until: string;
+  created_at: string;
+  updated_at: string;
 }

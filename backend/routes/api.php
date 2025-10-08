@@ -6,8 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ConnectionController;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\MessageController;
 
 // Public routes (no authentication required)
 Route::post('/signup', [AuthController::class, 'signup']);
@@ -58,4 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/connections/{connection}/accept', [ConnectionController::class, 'acceptRequest']);
     Route::post('/connections/{connection}/reject', [ConnectionController::class, 'rejectRequest']);
     Route::delete('/connections/{connection}/cancel', [ConnectionController::class, 'cancelRequest']);
+
+    // Messaging
+    Route::get('/connections/{connectionId}/messages', [MessageController::class, 'index']);
+    Route::post('/connections/{connectionId}/messages', [MessageController::class, 'store']);
 });

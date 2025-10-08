@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/auth-context";
 import { ConnectionsProvider } from "@/lib/contexts/connections-context";
+import { MessagesProvider } from "@/lib/contexts/messages-context";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -40,6 +41,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             <ConnectionsProvider>
+              <MessagesProvider>
               {children}
               <Toaster
                 position="top-right"
@@ -48,6 +50,7 @@ export default function RootLayout({
                 theme="light"
                 duration={4000}
               />
+              </MessagesProvider>
             </ConnectionsProvider>
           </AuthProvider>
         </ThemeProvider>
