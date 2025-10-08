@@ -1,7 +1,6 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
-// import { AppShell } from "@/components/layout/app-shell";
 import { SiteHeader } from "@/components/layout/site-header";
 import { MessagesContent } from "@/components/messages/messages-content";
 
