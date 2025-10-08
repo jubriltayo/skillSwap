@@ -1,21 +1,32 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { ConnectionService } from "@/lib/services/connections";
 import { UserService } from "@/lib/services/users";
 import { useAuth } from "./auth-context";
+import type {
+  Connection,
+  BaseResponse,
+  ConnectionResponseData,
+} from "@/lib/types";
 
 interface ConnectionsContextType {
-  connections: any[];
-  pendingRequests: any[];
-  acceptedConnections: any[];
+  connections: Connection[];
+  pendingRequests: Connection[];
+  acceptedConnections: Connection[];
   userConnectionCounts: Record<string, number>;
   loading: boolean;
   error: string | null;
-  sendRequest: (postId: string, message?: string) => Promise<any>;
-  acceptRequest: (connectionId: string) => Promise<any>;
-  rejectRequest: (connectionId: string) => Promise<any>;
-  cancelRequest: (connectionId: string) => Promise<any>;
+  sendRequest: (postId: string, message?: string) => Promise<BaseResponse>;
+  acceptRequest: (connectionId: string) => Promise<BaseResponse>;
+  rejectRequest: (connectionId: string) => Promise<BaseResponse>;
+  cancelRequest: (connectionId: string) => Promise<BaseResponse>;
   refetch: () => Promise<void>;
   getUserConnectionCount: (userId: string) => number | undefined;
   fetchUserConnectionCounts: (userIds: string[]) => Promise<void>;
@@ -31,16 +42,18 @@ export function ConnectionsProvider({
   children: React.ReactNode;
 }) {
   const { isAuthenticated } = useAuth();
-  const [connections, setConnections] = useState<any[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
-  const [acceptedConnections, setAcceptedConnections] = useState<any[]>([]);
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
+  const [acceptedConnections, setAcceptedConnections] = useState<Connection[]>(
+    []
+  );
   const [userConnectionCounts, setUserConnectionCounts] = useState<
     Record<string, number>
   >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     if (!isAuthenticated) {
       setLoading(false);
       return;
@@ -58,9 +71,10 @@ export function ConnectionsProvider({
         ]);
 
       if (connectionsResult.success && connectionsResult.data) {
+        const connectionData = connectionsResult.data as ConnectionResponseData;
         const allConnections = [
-          ...(connectionsResult.data.sent || []),
-          ...(connectionsResult.data.received || []),
+          ...(connectionData.sent || []),
+          ...(connectionData.received || []),
         ];
         setConnections(allConnections);
       }
@@ -86,12 +100,12 @@ export function ConnectionsProvider({
       if (errors.length > 0) {
         setError(errors[0] || "Failed to load some connection data");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated]);
 
   const fetchUserConnectionCounts = async (userIds: string[]) => {
     if (userIds.length === 0) return;
@@ -99,7 +113,6 @@ export function ConnectionsProvider({
     try {
       const counts: Record<string, number> = {};
 
-      // Fetch counts in parallel for better performance
       const countPromises = userIds.map(async (userId) => {
         try {
           const result = await UserService.getUserConnectionCount(userId);
@@ -110,7 +123,7 @@ export function ConnectionsProvider({
                 ? result.data.connection_count || 0
                 : 0,
           };
-        } catch (error) {
+        } catch {
           return { userId, count: 0 };
         }
       });
@@ -133,7 +146,7 @@ export function ConnectionsProvider({
 
   useEffect(() => {
     fetchAllData();
-  }, [isAuthenticated]);
+  }, [fetchAllData]);
 
   const sendRequest = async (postId: string, message?: string) => {
     const result = await ConnectionService.sendRequest(postId, message);

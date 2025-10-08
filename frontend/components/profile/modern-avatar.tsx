@@ -1,7 +1,7 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 
 interface ModernAvatarProps {
   src?: string;
@@ -37,7 +37,6 @@ export function ModernAvatar({
   isOnline = false,
 }: ModernAvatarProps) {
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Use useMemo to prevent unnecessary recalculations
   const finalSrc = useMemo(() => {
@@ -86,14 +85,8 @@ export function ModernAvatar({
     return colors[Math.abs(hash) % colors.length];
   };
 
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-    setImageError(false);
-  };
-
   const handleImageError = () => {
     setImageError(true);
-    setImageLoaded(false);
   };
 
   const shouldShowFallback = !finalSrc || imageError;
@@ -105,7 +98,6 @@ export function ModernAvatar({
           <AvatarImage
             src={finalSrc}
             alt={alt || name}
-            onLoad={handleImageLoad}
             onError={handleImageError}
             className="object-cover"
           />

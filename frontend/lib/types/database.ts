@@ -36,6 +36,18 @@ export interface Post {
   connection_status?: string;
 }
 
+export interface CreatePostData {
+  type: "offer" | "request";
+  title: string;
+  description: string;
+  skills: string[];
+  category?: string;
+  experience_level: "beginner" | "intermediate" | "advanced";
+  location?: string;
+  is_remote: boolean;
+  status: "active" | "inactive";
+}
+
 export interface Connection {
   id: string;
   sender_id: string;

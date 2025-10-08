@@ -136,12 +136,10 @@ export function SkillsManager({
           duration: 6000,
         });
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Something Went Wrong", {
         id: loadingToast,
-        description:
-          error.message ||
-          "An unexpected error occurred. Please try again later.",
+        description: "An unexpected error occurred. Please try again later.",
         duration: 6000,
       });
     } finally {

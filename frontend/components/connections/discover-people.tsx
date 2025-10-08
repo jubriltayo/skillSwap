@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { UserPlus, MapPin, Search } from "lucide-react";
 import { useAuth } from "@/lib/contexts/auth-context";
-import type { User } from "@/lib/types/database";
+import type { User } from "@/lib/types";
 import Link from "next/link";
 import { ConnectDialog } from "./connect-dialog";
 import { useUsers } from "@/lib/hooks/useUsers";
@@ -20,16 +20,19 @@ export function DiscoverPeople() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Safely parse skills - handle both array and JSON string
-  const parseSkills = (skills: any): string[] => {
+  const parseSkills = (skills: unknown): string[] => {
     if (Array.isArray(skills)) {
-      return skills;
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
     }
 
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((s): s is string => typeof s === "string")
+          : [];
       } catch {
         return [];
       }
@@ -40,7 +43,7 @@ export function DiscoverPeople() {
 
   useEffect(() => {
     // The useUsers hook will handle fetching automatically
-  }, [searchQuery]);
+  }, []);
 
   const handleSearch = async () => {
     if (searchQuery.trim()) {
@@ -54,7 +57,6 @@ export function DiscoverPeople() {
     setSelectedUser(user);
   };
 
-  // Filter out current user from the list
   const filteredUsers = users.filter((user) => user.id !== currentUser?.id);
 
   if (loading) {
@@ -69,7 +71,6 @@ export function DiscoverPeople() {
 
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
       <Card>
         <CardContent className="p-4">
           <div className="relative">
@@ -85,7 +86,6 @@ export function DiscoverPeople() {
         </CardContent>
       </Card>
 
-      {/* Users List */}
       <div className="space-y-4">
         {isSearching ? (
           <Card>
@@ -119,7 +119,7 @@ export function DiscoverPeople() {
                       <AvatarFallback>
                         {user.name
                           .split(" ")
-                          .map((n: string) => n[0])
+                          .map((n) => n[0])
                           .join("")
                           .toUpperCase()}
                       </AvatarFallback>
@@ -155,17 +155,15 @@ export function DiscoverPeople() {
                               Skills offered:
                             </p>
                             <div className="flex flex-wrap gap-2">
-                              {skillsOffered
-                                .slice(0, 4)
-                                .map((skill: string) => (
-                                  <Badge
-                                    key={skill}
-                                    variant="secondary"
-                                    className="bg-green-100 text-green-800 hover:bg-green-100"
-                                  >
-                                    {skill}
-                                  </Badge>
-                                ))}
+                              {skillsOffered.slice(0, 4).map((skill) => (
+                                <Badge
+                                  key={skill}
+                                  variant="secondary"
+                                  className="bg-green-100 text-green-800 hover:bg-green-100"
+                                >
+                                  {skill}
+                                </Badge>
+                              ))}
                               {skillsOffered.length > 4 && (
                                 <Badge variant="outline">
                                   +{skillsOffered.length - 4} more
@@ -180,17 +178,15 @@ export function DiscoverPeople() {
                                 Wants to learn:
                               </p>
                               <div className="flex flex-wrap gap-2">
-                                {skillsWanted
-                                  .slice(0, 3)
-                                  .map((skill: string) => (
-                                    <Badge
-                                      key={skill}
-                                      variant="secondary"
-                                      className="bg-blue-100 text-blue-800 hover:bg-blue-100"
-                                    >
-                                      {skill}
-                                    </Badge>
-                                  ))}
+                                {skillsWanted.slice(0, 3).map((skill) => (
+                                  <Badge
+                                    key={skill}
+                                    variant="secondary"
+                                    className="bg-blue-100 text-blue-800 hover:bg-blue-100"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                ))}
                                 {skillsWanted.length > 3 && (
                                   <Badge variant="outline">
                                     +{skillsWanted.length - 3} more
@@ -215,7 +211,6 @@ export function DiscoverPeople() {
         )}
       </div>
 
-      {/* Connect Dialog */}
       <ConnectDialog
         user={selectedUser}
         open={!!selectedUser}

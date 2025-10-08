@@ -1,14 +1,15 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { AppShell } from "@/components/layout/app-shell";
+// import { AppShell } from "@/components/layout/app-shell";
+import { SiteHeader } from "@/components/layout/site-header";
 import { MessagesContent } from "@/components/messages/messages-content";
 
 export default function MessagesPage() {
   return (
     <ProtectedRoute>
-      <AppShell>
-        <div className="container mx-auto px-4 py-8">
+      <SiteHeader />
+        <div className="container mx-auto px-4 py-8 mb-5">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
               Messages
@@ -19,7 +20,6 @@ export default function MessagesPage() {
           </div>
           <MessagesContent />
         </div>
-      </AppShell>
     </ProtectedRoute>
   );
 }

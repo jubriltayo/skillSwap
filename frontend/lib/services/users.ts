@@ -1,111 +1,157 @@
 import { apiClient } from "@/lib/api/client";
-
-interface UserResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
+import type {
+  User,
+  BaseResponse,
+  PaginatedResponse,
+  UserStats,
+  SkillsUpdateData,
+  AvatarUpdateData,
+} from "@/lib/types";
 
 export class UserService {
-  static async getUsers(): Promise<UserResponse> {
+  static async getUsers(): Promise<BaseResponse<User[]>> {
     try {
-      const response = await apiClient.get("/users");
+      const response = await apiClient.get<PaginatedResponse<User>>("/users");
+
+      if (response && response.success !== undefined) {
+        return {
+          success: response.success,
+          data: response.data,
+          error: response.error,
+        };
+      }
+
       return {
         success: true,
-        data: response.data,
+        data: Array.isArray(response) ? response : [],
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to fetch users",
+        error: error instanceof Error ? error.message : "Failed to fetch users",
       };
     }
   }
 
-  static async getUser(id: string): Promise<UserResponse> {
+  static async getUser(id: string): Promise<BaseResponse<User>> {
     try {
-      const response = await apiClient.get(`/users/${id}`);
+      const response = await apiClient.get<BaseResponse<User>>(`/users/${id}`);
+
+      if (response && response.success !== undefined) {
+        return response;
+      }
+
       return {
         success: true,
-        data: response.data,
+        data: response as unknown as User,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to fetch user",
+        error: error instanceof Error ? error.message : "Failed to fetch user",
       };
     }
   }
 
-  static async updateUser(id: string, userData: any): Promise<UserResponse> {
+  static async updateUser(
+    id: string,
+    userData: Partial<User>
+  ): Promise<BaseResponse<User>> {
     try {
-      const response = await apiClient.put(`/users/${id}`, userData);
+      const response = await apiClient.put<BaseResponse<User>>(
+        `/users/${id}`,
+        userData
+      );
+
+      if (response && response.success !== undefined) {
+        return response;
+      }
+
       return {
         success: true,
-        data: response.data,
+        data: response as unknown as User,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to update user",
+        error: error instanceof Error ? error.message : "Failed to update user",
       };
     }
   }
 
-  static async searchUsers(query: string): Promise<UserResponse> {
+  static async searchUsers(query: string): Promise<BaseResponse<User[]>> {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<BaseResponse<User[]>>(
         `/users/search?q=${encodeURIComponent(query)}`
       );
+
+      if (response && response.success !== undefined) {
+        return response;
+      }
+
       return {
         success: true,
-        data: response.data,
+        data: Array.isArray(response) ? response : [],
       };
-    } catch (error: any) {
-      console.error("Search users error:", error);
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to search users",
+        error:
+          error instanceof Error ? error.message : "Failed to search users",
       };
     }
   }
 
   static async updateUserSkills(
     userId: string,
-    skillsData: {
-      skills_offered?: string[];
-      skills_wanted?: string[];
-    }
-  ): Promise<UserResponse> {
+    skillsData: SkillsUpdateData
+  ): Promise<BaseResponse<User>> {
     try {
-      const response = await apiClient.put(
+      const response = await apiClient.put<BaseResponse<User>>(
         `/users/${userId}/skills`,
         skillsData
       );
+
+      if (response && response.success !== undefined) {
+        return response;
+      }
+
       return {
         success: true,
-        data: response.data,
+        data: response as unknown as User,
       };
-    } catch (error: any) {
-      console.error("Update skills error:", error);
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to update skills",
+        error:
+          error instanceof Error ? error.message : "Failed to update skills",
       };
     }
   }
 
-  static async getUserConnectionCount(userId: string): Promise<UserResponse> {
+  static async getUserConnectionCount(
+    userId: string
+  ): Promise<BaseResponse<UserStats>> {
     try {
-      const response = await apiClient.get(`/users/${userId}/connection-count`);
+      const response = await apiClient.get<BaseResponse<UserStats>>(
+        `/users/${userId}/connection-count`
+      );
+
+      if (response && response.success !== undefined) {
+        return response;
+      }
+
       return {
         success: true,
-        data: response.data,
+        data: response as unknown as UserStats,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to fetch connection count",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch connection count",
       };
     }
   }
@@ -113,7 +159,7 @@ export class UserService {
   static async updateAvatar(
     userId: string,
     avatarFile: File
-  ): Promise<UserResponse> {
+  ): Promise<BaseResponse<User>> {
     try {
       const base64Data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -122,29 +168,27 @@ export class UserService {
         reader.readAsDataURL(avatarFile);
       });
 
-      console.log("🔄 Sending avatar upload request...");
-      const response = await apiClient.post(`/users/${userId}/avatar`, {
-        avatar_base64: base64Data,
-        file_type: avatarFile.type,
-      });
-
-      console.log("📦 FULL API RESPONSE:", response);
-      console.log(
-        "🖼️  Avatar URL:",
-        response.avatar_url || response.data?.avatar_url
+      const response = await apiClient.post<BaseResponse<User>>(
+        `/users/${userId}/avatar`,
+        {
+          avatar_base64: base64Data,
+          file_type: avatarFile.type,
+        } as AvatarUpdateData
       );
-      console.log("👤 Full user data:", response.data);
 
-      // The response structure is: {success, message, data: {user object}}
+      if (response && response.success !== undefined) {
+        return response;
+      }
+
       return {
         success: true,
-        data: response.data, // This contains the full user object with avatar_url
+        data: response as unknown as User,
       };
-    } catch (error: any) {
-      console.error("❌ Avatar upload error:", error);
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to upload avatar",
+        error:
+          error instanceof Error ? error.message : "Failed to upload avatar",
       };
     }
   }

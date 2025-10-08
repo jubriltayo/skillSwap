@@ -45,7 +45,7 @@ export default function EditPostPage() {
           toast.error("Post not found");
           router.push("/posts");
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load post");
         router.push("/posts");
       } finally {

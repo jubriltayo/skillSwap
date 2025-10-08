@@ -7,6 +7,7 @@ import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
 import { EnhancedLoading } from "@/components/loading/enhanced-loading";
 import { useState, useEffect } from "react";
+import type { User } from "@/lib/types";
 
 export default function ProfilePage() {
   const { user, loading, updateUser } = useAuth();
@@ -17,7 +18,7 @@ export default function ProfilePage() {
     setCurrentUser(user);
   }, [user]);
 
-  const handleProfileUpdate = (updatedUser: any) => {
+  const handleProfileUpdate = (updatedUser: User) => {
     console.log("🔄 Profile update received:", updatedUser);
 
     // Update local state immediately
@@ -29,7 +30,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSkillsUpdate = (updatedUser: any) => {
+  const handleSkillsUpdate = (updatedUser: User) => {
     console.log("🔄 Skills update received:", updatedUser);
 
     // Update local state immediately

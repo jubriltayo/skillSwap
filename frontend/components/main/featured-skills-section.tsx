@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/posts/post-card";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import type { Post } from "@/lib/types/database";
+import type { Post } from "@/lib/types";
 import { EnhancedLoading } from "@/components/loading/enhanced-loading";
 
 interface FeaturedSkillsSectionProps {

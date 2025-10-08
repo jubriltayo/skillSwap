@@ -15,15 +15,19 @@ interface UserCardProps {
 
 export function UserCard({ user, connectionCount }: UserCardProps) {
   // Safely parse skills - handle both array and JSON string
-  const parseSkills = (skills: any): string[] => {
+  const parseSkills = (skills: unknown): string[] => {
     if (Array.isArray(skills)) {
-      return skills;
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
     }
 
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((skill): skill is string => typeof skill === "string")
+          : [];
       } catch {
         return [];
       }
@@ -36,7 +40,8 @@ export function UserCard({ user, connectionCount }: UserCardProps) {
   const skillsWanted = parseSkills(user.skills_wanted);
 
   // Format experience level for display
-  const formatExperienceLevel = (level: string) => {
+  const formatExperienceLevel = (level: string | null) => {
+    if (!level) return "Not specified";
     return level.charAt(0).toUpperCase() + level.slice(1);
   };
 

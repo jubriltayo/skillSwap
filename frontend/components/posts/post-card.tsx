@@ -1,12 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ModernAvatar } from "@/components/profile/modern-avatar";
-import { Clock, Users, Sparkles, MapPin } from "lucide-react";
+import { Clock, Sparkles, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Post } from "@/lib/types/database";
+import type { Post } from "@/lib/types";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { useConnections } from "@/lib/contexts/connections-context";
 import { useState } from "react";
@@ -23,13 +23,17 @@ export function PostCard({ post }: PostCardProps) {
   const router = useRouter();
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Safely parse skills
-  const parseSkills = (skills: any): string[] => {
-    if (Array.isArray(skills)) return skills;
+  const parseSkills = (skills: unknown): string[] => {
+    if (Array.isArray(skills))
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((s): s is string => typeof s === "string")
+          : [];
       } catch {
         return [];
       }
@@ -76,7 +80,7 @@ export function PostCard({ post }: PostCardProps) {
           description: result.error || "Failed to send request",
         });
       }
-    } catch (error) {
+    } catch {
       toast.error("Something Went Wrong", {
         id: loadingToast,
         description: "An error occurred while sending the request",

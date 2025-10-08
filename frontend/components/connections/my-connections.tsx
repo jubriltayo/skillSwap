@@ -8,21 +8,25 @@ import { MessageCircle, MapPin, Calendar } from "lucide-react";
 import { useAuth } from "@/lib/contexts/auth-context";
 import Link from "next/link";
 import { useConnections } from "@/lib/contexts/connections-context";
+import type { Connection } from "@/lib/types";
 
 export function MyConnections() {
   const { user } = useAuth();
   const { acceptedConnections, loading } = useConnections();
 
-  // Safely parse skills - handle both array and JSON string
-  const parseSkills = (skills: any): string[] => {
+  const parseSkills = (skills: unknown): string[] => {
     if (Array.isArray(skills)) {
-      return skills;
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
     }
 
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((s): s is string => typeof s === "string")
+          : [];
       } catch {
         return [];
       }
@@ -59,7 +63,7 @@ export function MyConnections() {
 
   return (
     <div className="space-y-4">
-      {acceptedConnections.map((connection) => {
+      {acceptedConnections.map((connection: Connection) => {
         const connectedUser =
           connection.sender_id === user?.id
             ? connection.receiver
@@ -81,7 +85,7 @@ export function MyConnections() {
                   <AvatarFallback>
                     {connectedUser.name
                       .split(" ")
-                      .map((n: string) => n[0])
+                      .map((n) => n[0])
                       .join("")
                       .toUpperCase()}
                   </AvatarFallback>
@@ -124,7 +128,7 @@ export function MyConnections() {
                       )}
 
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {skillsOffered.slice(0, 3).map((skill: string) => (
+                        {skillsOffered.slice(0, 3).map((skill) => (
                           <Badge
                             key={skill}
                             variant="secondary"

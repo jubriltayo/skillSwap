@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
-import type { User } from "@/lib/types/database";
+import type { User } from "@/lib/types";
 import { AuthService } from "@/lib/services/auth";
 
 interface AuthContextType {
@@ -32,14 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("auth_token");
-
-        if (token) {
-          const currentUser = await AuthService.getCurrentUser();
-          setUser(currentUser);
-        }
-      } catch (error) {
-        console.error("🔐 Auth check failed:", error);
+        const currentUser = await AuthService.getCurrentUser();
+        setUser(currentUser);
+      } catch {
         localStorage.removeItem("auth_token");
       } finally {
         setLoading(false);
@@ -57,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: true };
       }
       return { success: false, error: result.error };
-    } catch (error) {
+    } catch {
       return { success: false, error: "Login failed" };
     }
   };
@@ -80,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: true };
       }
       return { success: false, error: result.error };
-    } catch (error) {
+    } catch {
       return { success: false, error: "Registration failed" };
     }
   };

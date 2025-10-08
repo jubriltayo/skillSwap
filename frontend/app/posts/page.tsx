@@ -7,7 +7,7 @@ import { PostCard } from "@/components/posts/post-card";
 import { SkillFilterBar } from "@/components/posts/skill-filter-bar";
 import { EnhancedLoading } from "@/components/loading/enhanced-loading";
 import { usePosts } from "@/lib/hooks/usePosts";
-import type { Post } from "@/lib/types/database";
+import type { Post } from "@/lib/types";
 
 export default function PostsPage() {
   const { posts, loading, error, fetchPosts } = usePosts();
@@ -20,15 +20,19 @@ export default function PostsPage() {
   });
 
   // Safely parse skills - handle both array and JSON string
-  const parseSkills = (skills: any): string[] => {
+  const parseSkills = (skills: unknown): string[] => {
     if (Array.isArray(skills)) {
-      return skills;
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
     }
 
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((skill): skill is string => typeof skill === "string")
+          : [];
       } catch {
         return [];
       }
@@ -174,7 +178,7 @@ export default function PostsPage() {
           </div>
         )}
 
-        {/* Note: Load More functionality would need pagination support in your API */}
+        {/* Note: Load More functionality would need pagination support in the API */}
         {/* For now, we show all posts since usePosts fetches all */}
         {posts.length > 0 && (
           <div className="text-center mt-12">

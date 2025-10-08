@@ -1,48 +1,28 @@
 import { apiClient } from "@/lib/api/client";
-
-export interface Message {
-  id: string;
-  connection_id: string;
-  sender_id: string;
-  message: string;
-  created_at: string;
-  sender: {
-    id: string;
-    name: string;
-    username: string;
-    avatar_url: string | null;
-  };
-}
-
-interface MessageResponse {
-  success: boolean;
-  data?: Message | Message[];
-  error?: string;
-}
+import type { Message, BaseResponse } from "@/lib/types";
 
 export class MessageService {
-  static async getMessages(connectionId: string): Promise<MessageResponse> {
+  static async getMessages(
+    connectionId: string
+  ): Promise<BaseResponse<Message[]>> {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<BaseResponse<Message[]>>(
         `/connections/${connectionId}/messages`
       );
 
-      if (response && response.success !== undefined) {
-        return {
-          success: response.success,
-          data: response.data,
-          error: response.error,
-        };
+      if (response && typeof response === "object" && "success" in response) {
+        return response as BaseResponse<Message[]>;
       }
 
       return {
         success: true,
-        data: response,
+        data: response as unknown as Message[],
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to fetch messages",
+        error:
+          error instanceof Error ? error.message : "Failed to fetch messages",
       };
     }
   }
@@ -50,31 +30,28 @@ export class MessageService {
   static async sendMessage(
     connectionId: string,
     message: string
-  ): Promise<MessageResponse> {
+  ): Promise<BaseResponse<Message>> {
     try {
-      const response = await apiClient.post(
+      const response = await apiClient.post<BaseResponse<Message>>(
         `/connections/${connectionId}/messages`,
         {
           message,
         }
       );
 
-      if (response && response.success !== undefined) {
-        return {
-          success: response.success,
-          data: response.data,
-          error: response.error,
-        };
+      if (response && typeof response === "object" && "success" in response) {
+        return response as BaseResponse<Message>;
       }
 
       return {
         success: true,
-        data: response,
+        data: response as unknown as Message,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to send message",
+        error:
+          error instanceof Error ? error.message : "Failed to send message",
       };
     }
   }

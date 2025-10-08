@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
-import type { User } from "@/lib/types/database";
+import type { User } from "@/lib/types";
 import { useConnections } from "@/lib/contexts/connections-context";
 
 interface ConnectDialogProps {
@@ -49,7 +49,6 @@ export function ConnectDialog({
         onOpenChange(false);
       } else {
         console.error("Failed to send connection request:", result.error);
-        // You might want to show an error toast here
       }
     } catch (error) {
       console.error("Error sending connection request:", error);
@@ -64,7 +63,7 @@ export function ConnectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Connect with {user.name}</DialogTitle>{" "}
+          <DialogTitle>Connect with {user.name}</DialogTitle>
           <DialogDescription>
             Send a connection request to start building your professional
             relationship.
@@ -76,7 +75,7 @@ export function ConnectDialog({
             <AvatarImage
               src={user.avatar_url || "/placeholder.svg"}
               alt={user.name}
-            />{" "}
+            />
             <AvatarFallback>
               {user.name
                 .split(" ")
@@ -86,7 +85,7 @@ export function ConnectDialog({
             </AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold text-lg">{user.name}</h3>{" "}
+            <h3 className="font-semibold text-lg">{user.name}</h3>
             <p className="text-muted-foreground">@{user.username}</p>
           </div>
         </div>

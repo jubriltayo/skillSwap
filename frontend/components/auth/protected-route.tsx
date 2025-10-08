@@ -15,7 +15,6 @@ export function ProtectedRoute({
   children,
   redirectTo = "/login",
 }: ProtectedRouteProps) {
-  // Changed to /login
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 

@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { useMessages } from "@/lib/contexts/messages-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
+import { User } from "@/lib/types";
 
 interface MessagesListProps {
   connectionId: string;
-  otherUser: {
-    id: string;
-    name: string;
-    username: string;
-    avatar_url: string | null;
-  };
+  otherUser: Pick<User, "id" | "name" | "username" | "avatar_url">;
 }
 
 export function MessagesList({ connectionId, otherUser }: MessagesListProps) {
@@ -25,7 +21,10 @@ export function MessagesList({ connectionId, otherUser }: MessagesListProps) {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const connectionMessages = messages[connectionId] || [];
+  const connectionMessages = useMemo(
+    () => messages[connectionId] || [],
+    [messages, connectionId]
+  );
 
   useEffect(() => {
     loadMessages(connectionId);
@@ -44,8 +43,8 @@ export function MessagesList({ connectionId, otherUser }: MessagesListProps) {
       if (result.success) {
         setNewMessage("");
       }
-    } catch (error) {
-      console.error("Failed to send message:", error);
+    } catch {
+      console.error("Failed to send message");
     } finally {
       setSending(false);
     }

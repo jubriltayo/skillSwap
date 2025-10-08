@@ -49,7 +49,7 @@ export default function PostDetailPage() {
           toast.error("Post not found");
           router.push("/posts");
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load post");
         router.push("/posts");
       } finally {
@@ -63,16 +63,24 @@ export default function PostDetailPage() {
   }, [postId, router]);
 
   // Safely parse skills
-  const parseSkills = (skills: any): string[] => {
-    if (Array.isArray(skills)) return skills;
+  const parseSkills = (skills: unknown): string[] => {
+    if (Array.isArray(skills)) {
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
+    }
+
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((skill): skill is string => typeof skill === "string")
+          : [];
       } catch {
         return [];
       }
     }
+
     return [];
   };
 
@@ -107,6 +115,7 @@ export default function PostDetailPage() {
         });
       }
     } catch (error) {
+      console.error("Connection request failed:", error);
       toast.error("Something Went Wrong", {
         id: loadingToast,
         description: "An error occurred while sending the request",
@@ -137,6 +146,7 @@ export default function PostDetailPage() {
         });
       }
     } catch (error) {
+      console.error("Delete post failed:", error);
       toast.error("Delete Failed", {
         id: loadingToast,
         description: "An error occurred while deleting the post",

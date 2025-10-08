@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Camera, Loader2 } from "lucide-react";
-import type { User } from "@/lib/types/database";
+import type { User } from "@/lib/types";
 import { UserService } from "@/lib/services/users";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { toast } from "sonner";
@@ -115,7 +115,7 @@ export function EditProfileDialog({
           id: uploadToast,
         });
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Failed to upload photo. Please try again.", {
         id: uploadToast,
       });
@@ -141,18 +141,18 @@ export function EditProfileDialog({
 
       const result = await UserService.updateUser(user.id, updateData);
 
-      if (result.success) {
+      if (result.success && result.data) {
         if (currentUser?.id === user.id) {
           updateUser({ ...currentUser, ...updateData });
         }
 
-        onProfileUpdate?.(result.data?.data || result.data);
+        onProfileUpdate?.(result.data);
         onOpenChange(false);
         toast.success("Profile updated successfully!");
       } else {
         toast.error(result.error || "Failed to update profile");
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Failed to update profile");
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+// components/connections/pending-requests.tsx
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,25 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, MapPin } from "lucide-react";
 import { useAuth } from "@/lib/contexts/auth-context";
-import type { User } from "@/lib/types/database";
 import Link from "next/link";
 import { useConnections } from "@/lib/contexts/connections-context";
+import type { Connection } from "@/lib/types";
 
 export function PendingRequests() {
-  const { user } = useAuth();
+  useAuth();
   const { pendingRequests, loading, acceptRequest, rejectRequest } =
     useConnections();
 
-  // Safely parse skills - handle both array and JSON string
-  const parseSkills = (skills: any): string[] => {
+  const parseSkills = (skills: unknown): string[] => {
     if (Array.isArray(skills)) {
-      return skills;
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
     }
 
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((s): s is string => typeof s === "string")
+          : [];
       } catch {
         return [];
       }
@@ -66,7 +70,7 @@ export function PendingRequests() {
 
   return (
     <div className="space-y-4">
-      {pendingRequests.map((request) => {
+      {pendingRequests.map((request: Connection) => {
         const requester = request.sender;
         if (!requester) return null;
 
@@ -84,7 +88,7 @@ export function PendingRequests() {
                   <AvatarFallback>
                     {requester.name
                       .split(" ")
-                      .map((n: string) => n[0])
+                      .map((n) => n[0])
                       .join("")
                       .toUpperCase()}
                   </AvatarFallback>
@@ -118,7 +122,7 @@ export function PendingRequests() {
                       )}
 
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {skillsOffered.slice(0, 3).map((skill: string) => (
+                        {skillsOffered.slice(0, 3).map((skill) => (
                           <Badge
                             key={skill}
                             variant="secondary"

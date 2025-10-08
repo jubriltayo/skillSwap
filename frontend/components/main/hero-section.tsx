@@ -41,26 +41,6 @@ export function HeroSection() {
             </Link>
           )}
         </div>
-
-        {/* Stats - unchanged */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-foreground mb-2">
-              2,500+
-            </div>
-            <div className="text-muted-foreground">Active Members</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-foreground mb-2">
-              1,200+
-            </div>
-            <div className="text-muted-foreground">Skills Shared</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-foreground mb-2">850+</div>
-            <div className="text-muted-foreground">Connections Made</div>
-          </div>
-        </div>
       </div>
     </section>
   );

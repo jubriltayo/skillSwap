@@ -24,7 +24,7 @@ import {
 import { X, Plus } from "lucide-react";
 import { PostService } from "@/lib/services/posts";
 import { toast } from "sonner";
-import type { Post } from "@/lib/types/database";
+import type { Post, CreatePostData } from "@/lib/types";
 
 const SKILL_CATEGORIES = [
   "Web Development",
@@ -122,7 +122,7 @@ export function PostForm({
     );
 
     try {
-      const postData = {
+      const postData: CreatePostData = {
         type,
         title: title.trim(),
         description: description.trim(),
@@ -138,7 +138,8 @@ export function PostForm({
       if (mode === "create") {
         result = await PostService.createPost(postData);
       } else {
-        result = await PostService.updatePost(postId!, postData);
+        const updateData = { ...postData, user_id: initialData?.user_id };
+        result = await PostService.updatePost(postId!, updateData);
       }
 
       if (result.success) {
@@ -161,10 +162,10 @@ export function PostForm({
           description: result.error || "Please try again",
         });
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Something Went Wrong", {
         id: loadingToast,
-        description: error.message || "An unexpected error occurred",
+        description: "An unexpected error occurred",
       });
     } finally {
       setIsSubmitting(false);

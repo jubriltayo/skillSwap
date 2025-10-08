@@ -8,7 +8,7 @@ import { Search, Users } from "lucide-react";
 import { UserCard } from "@/components/users/user-card";
 import { useUsers } from "@/lib/hooks/useUsers";
 import { EnhancedLoading } from "@/components/loading/enhanced-loading";
-import type { User } from "@/lib/types/database";
+import type { User } from "@/lib/types";
 
 export default function UsersPage() {
   const { users, loading, error, refetch } = useUsers();
@@ -16,16 +16,24 @@ export default function UsersPage() {
   const [selectedSkill, setSelectedSkill] = useState("");
 
   // Safely parse skills
-  const parseSkills = (skills: any): string[] => {
-    if (Array.isArray(skills)) return skills;
+  const parseSkills = (skills: unknown): string[] => {
+    if (Array.isArray(skills)) {
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
+    }
+
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((skill): skill is string => typeof skill === "string")
+          : [];
       } catch {
         return [];
       }
     }
+
     return [];
   };
 
@@ -155,7 +163,7 @@ export default function UsersPage() {
           </p>
           {searchQuery && (
             <p className="text-xs text-muted-foreground mt-1">
-              Search results for: "{searchQuery}"
+              Search results for: &quot;{searchQuery}&quot;
             </p>
           )}
         </div>

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, MessageCircle } from "lucide-react";
+import type { Connection, User } from "@/lib/types";
 
 export function MessagesContent() {
   const { user } = useAuth();
@@ -17,17 +18,19 @@ export function MessagesContent() {
   );
   const [searchTerm, setSearchTerm] = useState("");
 
+  const getConnectedUser = (connection: Connection): User | undefined => {
+    return connection.sender_id === user?.id
+      ? connection.receiver
+      : connection.sender;
+  };
+
   const uniqueConnections = acceptedConnections.filter(
     (connection, index, self) =>
       index === self.findIndex((c) => c.id === connection.id)
   );
 
   const filteredConnections = uniqueConnections.filter((connection) => {
-    const connectedUser =
-      connection.sender_id === user?.id
-        ? connection.receiver
-        : connection.sender;
-
+    const connectedUser = getConnectedUser(connection);
     if (!connectedUser) return false;
 
     return (
@@ -35,12 +38,6 @@ export function MessagesContent() {
       connectedUser.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
-
-  const getConnectedUser = (connection: any) => {
-    return connection.sender_id === user?.id
-      ? connection.receiver
-      : connection.sender;
-  };
 
   if (loading) {
     return <div className="animate-pulse">Loading messages...</div>;
@@ -96,7 +93,7 @@ export function MessagesContent() {
                       <AvatarFallback>
                         {connectedUser.name
                           .split(" ")
-                          .map((n: string) => n[0])
+                          .map((n) => n[0])
                           .join("")
                           .toUpperCase()}
                       </AvatarFallback>

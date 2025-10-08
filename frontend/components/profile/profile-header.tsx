@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Calendar, Edit, UserPlus } from "lucide-react";
-import type { User } from "@/lib/types/database";
+import type { User } from "@/lib/types";
 import { EditProfileDialog } from "./edit-profile-dialog";
 import { useConnections } from "@/lib/contexts/connections-context";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { ModernAvatar } from "./modern-avatar";
+import { toast } from "sonner";
 
 interface ProfileHeaderProps {
   user: User;
@@ -71,12 +72,12 @@ export function ProfileHeader({
         `I'd like to connect with you, ${user.name}!`
       );
       if (result.success) {
-        alert("Connection request sent successfully!");
+        toast.success("Connection request sent successfully!");
       } else {
-        alert(result.error || "Failed to send connection request");
+        toast.error(result.error || "Failed to send connection request");
       }
-    } catch (error) {
-      alert("An error occurred while sending the request");
+    } catch {
+      toast.error("An error occurred while sending the request");
     } finally {
       setIsConnecting(false);
     }

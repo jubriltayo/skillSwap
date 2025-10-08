@@ -31,7 +31,7 @@ export interface UserStats {
   connection_count: number;
 }
 
-export interface PostFilters {
+export interface PostFilters extends Record<string, unknown> {
   type?: "offer" | "request";
   experience_level?: "beginner" | "intermediate" | "advanced";
   skills?: string[];
@@ -44,7 +44,7 @@ export interface PostFilters {
   per_page?: number;
 }
 
-export interface UserSearchParams {
+export interface UserSearchParams extends Record<string, unknown> {
   q: string;
 }
 

@@ -1,127 +1,156 @@
 import { apiClient } from "@/lib/api/client";
-
-interface ConnectionResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
+import type {
+  BaseResponse,
+  Connection,
+  ConnectionResponseData,
+} from "@/lib/types";
 
 export class ConnectionService {
   static async sendRequest(
     postId: string,
     message?: string
-  ): Promise<ConnectionResponse> {
+  ): Promise<BaseResponse<Connection>> {
     try {
-      const response = await apiClient.post(`/posts/${postId}/connections`, {
-        message,
-      });
+      const response = await apiClient.post<BaseResponse<Connection>>(
+        `/posts/${postId}/connections`,
+        {
+          message,
+        }
+      );
       return {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to send connection request",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to send connection request",
       };
     }
   }
 
-  static async getPendingRequests(): Promise<ConnectionResponse> {
+  static async getPendingRequests(): Promise<BaseResponse<Connection[]>> {
     try {
-      const response = await apiClient.get("/connections/pending");
+      const response = await apiClient.get<BaseResponse<Connection[]>>(
+        "/connections/pending"
+      );
       return {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to fetch pending requests",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch pending requests",
       };
     }
   }
 
-  static async getAcceptedConnections(): Promise<ConnectionResponse> {
+  static async getAcceptedConnections(): Promise<BaseResponse<Connection[]>> {
     try {
-      const response = await apiClient.get("/connections/accepted");
+      const response = await apiClient.get<BaseResponse<Connection[]>>(
+        "/connections/accepted"
+      );
       return {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to fetch accepted connections",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch accepted connections",
       };
     }
   }
 
-  static async getAllConnections(): Promise<ConnectionResponse> {
+  static async getAllConnections(): Promise<
+    BaseResponse<ConnectionResponseData>
+  > {
     try {
-      const response = await apiClient.get("/connections");
+      const response = await apiClient.get<
+        BaseResponse<ConnectionResponseData>
+      >("/connections");
       return {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to fetch connections",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch connections",
       };
     }
   }
 
   static async acceptRequest(
     connectionId: string
-  ): Promise<ConnectionResponse> {
+  ): Promise<BaseResponse<Connection>> {
     try {
-      const response = await apiClient.post(
+      const response = await apiClient.post<BaseResponse<Connection>>(
         `/connections/${connectionId}/accept`
       );
       return {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to accept connection",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to accept connection",
       };
     }
   }
 
   static async rejectRequest(
     connectionId: string
-  ): Promise<ConnectionResponse> {
+  ): Promise<BaseResponse<Connection>> {
     try {
-      const response = await apiClient.post(
+      const response = await apiClient.post<BaseResponse<Connection>>(
         `/connections/${connectionId}/reject`
       );
       return {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to reject connection",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to reject connection",
       };
     }
   }
 
-  static async cancelRequest(
-    connectionId: string
-  ): Promise<ConnectionResponse> {
+  static async cancelRequest(connectionId: string): Promise<BaseResponse> {
     try {
       await apiClient.delete(`/connections/${connectionId}/cancel`);
       return {
         success: true,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: error.message || "Failed to cancel connection",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to cancel connection",
       };
     }
   }

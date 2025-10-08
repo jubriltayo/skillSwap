@@ -12,7 +12,6 @@ import { PostService } from "@/lib/services/posts";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { ModernAvatar } from "@/components/profile/modern-avatar";
 import { cn } from "@/lib/utils";
 
 interface ProfileTabsProps {
@@ -47,8 +46,8 @@ export function ProfileTabs({
           );
           setUserPosts(userPosts);
         }
-      } catch (error) {
-        console.error("Failed to load user posts:", error);
+      } catch {
+        console.error("Failed to load user posts");
       } finally {
         setPostsLoading(false);
       }
@@ -58,20 +57,42 @@ export function ProfileTabs({
   }, [user.id]);
 
   // Safely parse skills - handle both array and JSON string
-  const parseSkills = (skills: any): string[] => {
+  const parseSkills = (skills: unknown): string[] => {
     if (Array.isArray(skills)) {
-      return skills;
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
     }
 
     if (typeof skills === "string") {
       try {
         const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((s): s is string => typeof s === "string")
+          : [];
       } catch {
         return [];
       }
     }
 
+    return [];
+  };
+
+  const parsePostSkills = (skills: unknown): string[] => {
+    if (Array.isArray(skills))
+      return skills.filter(
+        (skill): skill is string => typeof skill === "string"
+      );
+    if (typeof skills === "string") {
+      try {
+        const parsed = JSON.parse(skills);
+        return Array.isArray(parsed)
+          ? parsed.filter((s): s is string => typeof s === "string")
+          : [];
+      } catch {
+        return [];
+      }
+    }
     return [];
   };
 
@@ -94,7 +115,7 @@ export function ProfileTabs({
       const skillsData = { [fieldName]: updatedSkills };
       const result = await UserService.updateUserSkills(user.id, skillsData);
 
-      if (result.success) {
+      if (result.success && result.data) {
         // Update auth context if it's the current user
         if (currentUser?.id === user.id) {
           updateUser({
@@ -103,7 +124,7 @@ export function ProfileTabs({
           });
         }
 
-        // Notify parent
+        // Notify parent - result.data is guaranteed to be User here
         onSkillsUpdate?.(result.data);
 
         toast.success("Skill removed", {
@@ -116,7 +137,7 @@ export function ProfileTabs({
           description: result.error || "Please try again",
         });
       }
-    } catch (error) {
+    } catch {
       toast.error("Remove failed", {
         id: loadingToast,
         description: "An error occurred while removing skill",
@@ -158,19 +179,6 @@ export function ProfileTabs({
       return "Remote";
     }
     return post.location || "In-person";
-  };
-
-  const parsePostSkills = (skills: any): string[] => {
-    if (Array.isArray(skills)) return skills;
-    if (typeof skills === "string") {
-      try {
-        const parsed = JSON.parse(skills);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    }
-    return [];
   };
 
   return (

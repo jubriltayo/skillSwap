@@ -1,13 +1,17 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { MessageService, Message } from "@/lib/services/messages";
+import { MessageService } from "@/lib/services/messages";
+import type { Message, BaseResponse } from "@/lib/types";
 
 interface MessagesContextType {
   messages: Record<string, Message[]>;
   loading: boolean;
-  sendMessage: (connectionId: string, message: string) => Promise<any>;
-  loadMessages: (connectionId: string) => Promise<any>;
+  sendMessage: (
+    connectionId: string,
+    message: string
+  ) => Promise<BaseResponse<Message>>;
+  loadMessages: (connectionId: string) => Promise<BaseResponse<Message[]>>;
 }
 
 const MessagesContext = createContext<MessagesContextType | undefined>(
@@ -39,8 +43,12 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
         }));
       }
       return result;
-    } catch (error) {
-      return { success: false, error };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to load messages",
+      };
     } finally {
       setLoading(false);
     }
@@ -54,7 +62,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
       );
 
       if (result.success && result.data) {
-        const newMessage = result.data as Message;
+        const newMessage = result.data;
 
         setMessages((prev) => {
           const currentMessages = prev[connectionId] || [];
