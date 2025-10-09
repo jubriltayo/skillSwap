@@ -1,53 +1,25 @@
-# Production Dockerfile for Laravel + PostgreSQL on Render
-FROM ubuntu:22.04
+# Use official PHP image with extensions
+FROM php:8.2-cli
 
-# ===== SYSTEM SETUP =====
-RUN apt-get update && apt-get install -y \
-    software-properties-common \
-    curl \
-    ca-certificates \
-    gnupg \
-    && LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
-    && apt-get clean
+# Install required extensions
+RUN apt-get update \
+    && apt-get install -y libpq-dev git unzip \
+    && docker-php-ext-install pdo pdo_pgsql
 
-# ===== PHP & EXTENSIONS =====
-RUN apt-get update && apt-get install -y \
-    php8.2 \
-    php8.2-fpm \
-    php8.2-pgsql \
-    php8.2-mbstring \
-    php8.2-xml \
-    php8.2-curl \
-    php8.2-zip \
-    php8.2-opcache \
-    && apt-get clean
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# ===== COMPOSER =====
-RUN curl -sS https://getcomposer.org/installer | php -- \
-    --install-dir=/usr/local/bin \
-    --filename=composer \
-    --2
+# Set working directory
+WORKDIR /var/www/html
 
-# ===== APPLICATION SETUP =====
-WORKDIR /var/www
+# Copy app files
 COPY . .
 
-# Install dependencies (cached layer)
-RUN composer install --no-dev --optimize-autoloader \
-    && composer dump-autoload --optimize
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# ===== PRODUCTION OPTIMIZATIONS =====
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && chown -R www-data:www-data storage bootstrap/cache
-
-# ===== HEALTH CHECK =====
-COPY health-check.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/health-check.sh
-HEALTHCHECK --interval=30s --timeout=3s \
-    CMD /usr/local/bin/health-check.sh
-
-# ===== RUNTIME =====
+# Expose port
 EXPOSE 8000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+
+# Start server
+CMD php artisan serve --host=0.0.0.0 --port=8000
