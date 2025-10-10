@@ -1,10 +1,10 @@
 # Optimized single-container Laravel + PostgreSQL for Render free tier
 FROM php:8.2-fpm
 
-# Install system dependencies and PostgreSQL
+# Install system dependencies and PostgreSQL (use default version)
 RUN apt-get update && apt-get install -y \
-    postgresql-15 \
-    postgresql-contrib-15 \
+    postgresql \
+    postgresql-contrib \
     libpq-dev \
     nginx \
     supervisor \
@@ -38,21 +38,24 @@ RUN mkdir -p bootstrap/cache \
 RUN composer dump-autoload --optimize && \
     php artisan package:discover --ansi || true
 
-# PostgreSQL setup
-RUN mkdir -p /var/lib/postgresql/data /var/run/postgresql && \
+# PostgreSQL setup - find the actual version installed
+RUN PG_VERSION=$(ls /usr/lib/postgresql/ | head -n 1) && \
+    echo "export PG_VERSION=$PG_VERSION" > /etc/profile.d/postgres.sh && \
+    mkdir -p /var/lib/postgresql/data /var/run/postgresql && \
     chown -R postgres:postgres /var/lib/postgresql /var/run/postgresql && \
     chmod 750 /var/lib/postgresql/data
 
 # Initialize database
 USER postgres
-RUN /usr/lib/postgresql/15/bin/initdb -D /var/lib/postgresql/data && \
+RUN PG_VERSION=$(ls /usr/lib/postgresql/ | head -n 1) && \
+    /usr/lib/postgresql/$PG_VERSION/bin/initdb -D /var/lib/postgresql/data && \
     echo "host all all 127.0.0.1/32 trust" >> /var/lib/postgresql/data/pg_hba.conf && \
     echo "host all all ::1/128 trust" >> /var/lib/postgresql/data/pg_hba.conf && \
-    /usr/lib/postgresql/15/bin/pg_ctl -D /var/lib/postgresql/data -o "-c listen_addresses='localhost'" start && \
+    /usr/lib/postgresql/$PG_VERSION/bin/pg_ctl -D /var/lib/postgresql/data -o "-c listen_addresses='localhost'" start && \
     sleep 3 && \
     psql -c "CREATE USER laravel WITH PASSWORD 'secret' CREATEDB;" && \
     psql -c "CREATE DATABASE laravel OWNER laravel;" && \
-    /usr/lib/postgresql/15/bin/pg_ctl -D /var/lib/postgresql/data stop
+    /usr/lib/postgresql/$PG_VERSION/bin/pg_ctl -D /var/lib/postgresql/data stop
 
 USER root
 
@@ -73,12 +76,19 @@ RUN echo 'server {\n\
         fastcgi_index index.php;\n\
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;\n\
         include fastcgi_params;\n\
+        fastcgi_read_timeout 300;\n\
     }\n\
 \n\
     location ~ /\.(?!well-known).* {\n\
         deny all;\n\
     }\n\
 }' > /etc/nginx/sites-available/default
+
+# Create startup script for PostgreSQL that finds the version
+RUN echo '#!/bin/bash\n\
+PG_VERSION=$(ls /usr/lib/postgresql/ | head -n 1)\n\
+exec /usr/lib/postgresql/$PG_VERSION/bin/postgres -D /var/lib/postgresql/data' > /usr/local/bin/start-postgres.sh && \
+chmod +x /usr/local/bin/start-postgres.sh
 
 # Supervisor config
 RUN echo '[supervisord]\n\
@@ -88,7 +98,7 @@ logfile=/dev/stdout\n\
 logfile_maxbytes=0\n\
 \n\
 [program:postgresql]\n\
-command=/usr/lib/postgresql/15/bin/postgres -D /var/lib/postgresql/data\n\
+command=/usr/local/bin/start-postgres.sh\n\
 user=postgres\n\
 autostart=true\n\
 autorestart=true\n\
@@ -129,15 +139,21 @@ stderr_logfile_maxbytes=0' > /etc/supervisor/conf.d/supervisord.conf
 RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Waiting for PostgreSQL..."\n\
-until pg_isready -h localhost -U laravel 2>/dev/null; do sleep 1; done\n\
-echo "PostgreSQL ready!"\n\
+for i in {1..30}; do\n\
+  if pg_isready -h localhost -U laravel 2>/dev/null; then\n\
+    echo "PostgreSQL ready!"\n\
+    break\n\
+  fi\n\
+  echo "Attempt $i: PostgreSQL not ready yet..."\n\
+  sleep 2\n\
+done\n\
 cd /var/www/html\n\
 php artisan config:cache\n\
 php artisan route:cache\n\
 php artisan view:cache\n\
 php artisan migrate --force --no-interaction\n\
 php artisan db:seed --force --no-interaction || true\n\
-echo "Laravel initialized!"' > /var/www/html/init.sh && \
+echo "Laravel initialized successfully!"' > /var/www/html/init.sh && \
 chmod +x /var/www/html/init.sh
 
 EXPOSE 8000
