@@ -1,8 +1,9 @@
 FROM php:8.2-fpm-alpine
 
-# Install
-RUN apk add --no-cache git unzip curl libpq postgresql-client && \
-    docker-php-ext-install pdo pdo_pgsql
+# Install only what we need
+RUN apk add --no-cache git unzip curl libpq libpq-dev && \
+    docker-php-ext-install pdo pdo_pgsql && \
+    apk del libpq-dev
 
 WORKDIR /app
 
@@ -15,14 +16,11 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Create storage directories
-RUN mkdir -p storage/app/public storage/logs bootstrap/cache && \
+# Create storage directories with full permissions
+RUN mkdir -p storage/app/public storage/logs bootstrap/cache storage/framework/{cache,sessions,views} && \
     chmod -R 777 storage bootstrap/cache
 
-# Create symlink for public storage
-RUN php artisan storage:link 2>/dev/null || true
-
-# Run migrations on startup
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
-
+# Don't run anything else - just start the server
 EXPOSE 8000
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
