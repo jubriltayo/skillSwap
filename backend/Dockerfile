@@ -7,7 +7,7 @@ RUN apk add --no-cache \
     git \
     unzip \
     curl \
-    libpq \
+    sqlite-dev \
     && docker-php-ext-install pdo pdo_sqlite
 
 # Install Composer
