@@ -1,7 +1,8 @@
 FROM php:8.2-fpm-alpine
 
-# Install only what we need
-RUN apk add --no-cache git unzip curl libpq
+# Install
+RUN apk add --no-cache git unzip curl libpq postgresql-client && \
+    docker-php-ext-install pdo pdo_pgsql
 
 WORKDIR /app
 
