@@ -3,10 +3,13 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:3000'], // Your frontend URL
+    'allowed_origins' => [
+        'http://localhost:3000',
+        'https://skill-swap-nn7n-cgxltetfg-tayo-jubrils-projects.vercel.app'
+    ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
-    'supports_credentials' => true, // Make sure this is true
+    'supports_credentials' => true,
 ];
