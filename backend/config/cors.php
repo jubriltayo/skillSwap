@@ -5,7 +5,7 @@ return [
     'allowed_methods' => ['*'],
     'allowed_origins' => [
         'http://localhost:3000',
-        'https://skill-swap-nn7n.vercel.app/',
+        'https://skill-swap-nn7n.vercel.app',
         'https://skill-swap-nn7n-cgxltetfg-tayo-jubrils-projects.vercel.app'
     ],
     'allowed_origins_patterns' => [],
