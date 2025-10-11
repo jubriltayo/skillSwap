@@ -20,10 +20,10 @@ RUN composer install --no-dev --optimize-autoloader
 RUN mkdir -p storage/app/public storage/logs bootstrap/cache storage/framework/{cache,sessions,views} && \
     chmod -R 777 storage bootstrap/cache
 
-# Create symlink
-RUN php artisan storage:link
+# Remove public/storage if it exists, then create symlink
+RUN rm -rf public/storage && php artisan storage:link
 
-# Don't run anything else - just start the server
+# Start the server
 EXPOSE 8000
 
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
