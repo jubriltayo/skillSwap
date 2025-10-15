@@ -18,7 +18,7 @@ A Laravel-based skill exchange platform where users can offer their expertise an
 
 ## Tech Stack
 
-- **Backend**: Laravel 11 with PHP 8.2+
+- **Backend**: Laravel 12.9 with PHP 8.2+
 - **Authentication**: Laravel Sanctum (API tokens)
 - **Database**: PostgreSQL
 - **API**: RESTful JSON API

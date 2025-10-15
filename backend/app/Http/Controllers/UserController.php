@@ -360,18 +360,4 @@ class UserController extends Controller
             ], 500);
         }
     }
-
-    private function getExtensionFromMimeType($mimeType)
-    {
-        $mappings = [
-            'image/jpeg' => 'jpg',
-            'image/jpg' => 'jpg',
-            'image/png' => 'png',
-            'image/gif' => 'gif',
-            'image/webp' => 'webp',
-            'image/x-icon' => 'ico',
-        ];
-
-        return $mappings[$mimeType] ?? 'png';
-    }
 }

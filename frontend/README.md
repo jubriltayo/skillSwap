@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# SkillSwap Frontend — Next.js + TypeScript
 
-First, run the development server:
+This is the frontend for SkillSwap, a skill-based collaboration platform. It’s built with Next.js 15+, TypeScript, and React Context for global state management.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🧱 Tech Stack
+
+- **Framework**: Next.js 15+ (App Router)
+- **Language**: TypeScript
+- **State Management**: React Context + Custom Hooks
+- **Styling**: Tailwind CSS
+- **Routing**: File-based routing via `app/`
+
+---
+
+## 📦 Folder Structure
+
+```
+frontend/
+├── app/              # Route-level pages and layouts
+│   ├── (auth)/       # Login and registration
+│   ├── connections/  # Connections dashboard
+│   ├── messages/     # Messaging interface
+│   ├── posts/        # Post listing, creation, editing
+│   ├── profile/      # User profile views
+│   ├── users/        # User discovery
+│   ├── layout.tsx    # Global layout wrapper
+│   └── page.tsx      # Home page
+├── components/       # Reusable UI and feature components
+│   ├── auth/         # Protected route wrapper
+│   ├── connections/  # Connection tabs, dialogs, lists
+│   ├── layout/       # Header, footer, app shell
+│   ├── loading/      # Enhanced loading indicators
+│   ├── main/         # Home page sections
+│   ├── messages/     # Message list and content
+│   ├── posts/        # Post card, form, filters
+│   ├── profile/      # Avatar, tabs, skill manager
+│   ├── theme/        # Theme toggle and provider
+│   ├── ui/           # Generic UI components (button, card, input, etc.)
+│   └── users/        # User card component
+├── lib/              # Logic layer
+│   ├── api/          # API client wrapper
+│   ├── contexts/     # Auth, Connections, Messages providers
+│   ├── hooks/        # Custom hooks for posts and users
+│   ├── services/     # Business logic for API calls
+│   ├── types/        # TypeScript interfaces
+│   ├── utils/        # Utility functions
+├── public/           # Static assets
+├── next.config.ts    # Next.js config
+├── package.json      # Project dependencies
+└── tsconfig.json     # TypeScript config
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔐 AuthContext
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Manages login, logout, registration, and current user state.
 
-## Learn More
+```tsx
+const { user, login, logout } = useAuth();
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔗 ConnectionsContext
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Tracks all connection-related data and actions.
 
-## Deploy on Vercel
+```tsx
+const { connections, sendRequest, acceptRequest } = useConnections();
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 💬 MessagesContext
+
+Handles message loading and sending per connection.
+
+```tsx
+const { messages, sendMessage, loadMessages } = useMessages();
+```
+
+---
+
+## 🧠 Custom Hooks
+
+- `useUsers()` → fetch and search users
+- `usePosts()` → fetch, create, update, delete posts
+- `useUserPosts()` → fetch current user’s posts
+
+---
+
+## 🛠 Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Set your `.env.local`:
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
