@@ -91,6 +91,9 @@ SANCTUM_STATEFUL_DOMAINS=localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
 
+### Live Demo
+https://youtu.be/TcjaVS2VFNo
+
 ---
 
 ## 🧠 Contributing
